@@ -21,13 +21,15 @@ builder.Services.AddFeatureManagement();
 
 builder.Services.AddHttpClient();
 
+builder.Services.AddSteadybitFailureServices();
+
 var app = builder.Build();
 
 app.UseAzureAppConfiguration();
 
-app.UseMiddleware<SteadybitFailureMiddleware>();
+app.UseMiddleware<SteadybitInjectionMiddleware>();
 
-app.MapGet("/", (IConfiguration configuration) => $"Hello World! {configuration["Steadybit:FaultInjection:Test"]}");
+app.MapGet("/", () => $"Hello World!");
 
 Console.WriteLine($"Running...");
 app.Run();

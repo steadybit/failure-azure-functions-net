@@ -4,7 +4,7 @@ namespace SteadybitFailureInjection;
 
 public class SteadybitFailureOptions
 {
-  public string? Revision { get; set; }
+  public string Revision { get; set; }
 
   public SteadybitDelayFailureOptions? Delay { get; set; }
 
@@ -25,7 +25,7 @@ public class SteadybitFailureOptions
       {
         return (HttpStatusCode)statusCodeValue;
       }
-      
+
       return null;
     }
   }
@@ -44,7 +44,7 @@ public class SteadybitDelayFailureOptions
   {
     get
     {
-      bool success =int.TryParse(_rate, out int rateValue);
+      bool success = int.TryParse(_rate, out int rateValue);
       return success ? rateValue : null;
     }
   }
