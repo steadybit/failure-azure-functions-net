@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -8,22 +10,19 @@ using SteadybitFailureInjection.Failures;
 
 namespace SteadybitFailureInjection;
 
-public class SteadybitInjectionMiddleware
+public class SteadybitInjectionMiddleware: IFunctionsWorkerMiddleware
 {
-  private readonly RequestDelegate _next;
   private readonly IConfiguration _configuration;
   private readonly IFeatureManager _featureManager;
   private readonly ILogger _logger;
-
   private readonly IEnumerable<ISteadybitFailure> _failures;
 
-  public SteadybitInjectionMiddleware(RequestDelegate next, IConfiguration configuration, IFeatureManager featureManager, ILoggerFactory? loggerFactory, IEnumerable<ISteadybitFailure> failures)
+  public SteadybitInjectionMiddleware(IConfiguration configuration, IFeatureManager featureManager, ILoggerFactory? loggerFactory, IEnumerable<ISteadybitFailure> failures)
   {
-    _next = next;
     _configuration = configuration;
     _featureManager = featureManager;
-    _failures = failures.OrderBy(f => f.Priority);
     _logger = loggerFactory?.CreateLogger<SteadybitInjectionMiddleware>() ?? NullLoggerFactory.Instance.CreateLogger<SteadybitInjectionMiddleware>();
+    _failures = failures;
   }
 
   public async Task<bool> IsMiddlewareEnabledAsync()
@@ -40,11 +39,11 @@ public class SteadybitInjectionMiddleware
     return options;
   }
 
-  public async Task InvokeAsync(HttpContext context)
+  public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
   {
     if (!await IsMiddlewareEnabledAsync())
     {
-      await _next(context);
+      await next(context);
       return;
     }
 
@@ -52,18 +51,18 @@ public class SteadybitInjectionMiddleware
 
     if (options?.Revision == null)
     {
-      await _next(context);
+      await next(context);
       _logger.LogWarning("Sentinel key Steadybit:FaultInjection:Revision is not set. Configuration won't be able to refresh.");
       return;
     }
 
     foreach (var failure in _failures)
     {
-        Console.WriteLine($"Executing before failure: {failure.GetType().Name} with priority {failure.Priority}");
-        await failure.ExecuteBeforeAsync(context, options);
+      Console.WriteLine($"Executing before failure: {failure.GetType().Name} with priority {failure.Priority}");
+      await failure.ExecuteBeforeAsync(context, options);
     }
 
-    await _next(context);
+    await next(context);
 
     foreach (var failure in _failures)
     {

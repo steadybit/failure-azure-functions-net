@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Azure.Functions.Worker;
 
 namespace SteadybitFailureInjection.Failures;
 
@@ -6,12 +7,12 @@ public class DelayFailure : ISteadybitFailure
 {
   public int Priority => 1;
 
-  public Task ExecuteAfterAsync(HttpContext context, SteadybitFailureOptions options)
+  public Task ExecuteAfterAsync(FunctionContext context, SteadybitFailureOptions options)
   {
     return Task.CompletedTask;
   }
 
-  public async Task ExecuteBeforeAsync(HttpContext context, SteadybitFailureOptions options)
+  public async Task ExecuteBeforeAsync(FunctionContext context, SteadybitFailureOptions options)
   {
       if (!(options?.Delay != null &&
          options.Delay.MinimumLatencyValue.HasValue &&

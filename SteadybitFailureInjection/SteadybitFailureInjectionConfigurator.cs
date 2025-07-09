@@ -23,13 +23,8 @@ public static class SteadybitFailureInjectionConfigurator
 
   public static void AddSteadybitFailureServices(this IServiceCollection services)
   {
-    services.AddSingleton<DelayFailure>();
-    services.AddSingleton<ExceptionFailure>();
-    services.AddSingleton<StatusCodeFailure>();
-    
-    services.AddSingleton<IEnumerable<ISteadybitFailure>>(serviceProvider => new List<ISteadybitFailure>
-      {
-        serviceProvider.GetRequiredService<StatusCodeFailure>()
-      });
-    }
+    services.AddScoped<ISteadybitFailure, DelayFailure>();
+    services.AddScoped<ISteadybitFailure, ExceptionFailure>();
+    services.AddScoped<ISteadybitFailure, StatusCodeFailure>();
+  }
 }

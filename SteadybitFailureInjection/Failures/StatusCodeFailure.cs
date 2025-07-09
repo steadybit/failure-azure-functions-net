@@ -1,38 +1,30 @@
-
+using System.ComponentModel;
+using System.Net;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 
 namespace SteadybitFailureInjection.Failures;
 
-public class StatusCodeFailure : ISteadybitFailure, IDisposable
+public class SteadybitException : Exception
 {
-  private Stream? _startingBodyStream;
-  private Stream? _newStream;
+  public SteadybitException(string message) : base(message)
+  {
+  }
+}
+
+public class StatusCodeFailure : ISteadybitFailure
+{
+  private HttpRequestData? _httpRequestData;
   public int Priority => 100; // Should always be executed last.
 
-  public void Dispose()
+  public async Task ExecuteBeforeAsync(FunctionContext context, SteadybitFailureOptions options)
   {
-    if (_newStream != null)
-    {
-      _newStream.Dispose();
-    }
   }
 
-  public Task ExecuteBeforeAsync(HttpContext context, SteadybitFailureOptions options)
+
+  public async Task ExecuteAfterAsync(FunctionContext context, SteadybitFailureOptions options)
   {
-    _startingBodyStream = context.Response.Body;
-    var memoryStream = new MemoryStream();
-    context.Response.Body = memoryStream;
-    return Task.CompletedTask;
-  }
-  public async Task ExecuteAfterAsync(HttpContext context, SteadybitFailureOptions options)
-  {
-    if (options?.StatusCodeValue != null && _newStream != null && _startingBodyStream != null)
-    {
-      context.Response.StatusCode = (int)options.StatusCodeValue;
-      _newStream.Seek(0, SeekOrigin.Begin);
-      await _newStream.CopyToAsync(_startingBodyStream);
-      context.Response.Body = _startingBodyStream;
-      return;
-    }
   }
 }
