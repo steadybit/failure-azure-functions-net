@@ -3,31 +3,36 @@ using Microsoft.AspNetCore.Http;
 
 namespace SteadybitFailureInjection.Failures;
 
-public class StatusCodeFailure : ISteadybitFailure
+public class StatusCodeFailure : ISteadybitFailure, IDisposable
 {
+  private Stream? _startingBodyStream;
+  private Stream? _newStream;
   public int Priority => 100; // Should always be executed last.
 
-  public async Task ExecuteAsync(RequestDelegate next, HttpContext context, SteadybitFailureOptions options)
+  public void Dispose()
   {
-    var originalBodyStream = context.Response.Body;
-
-    using var memoryStream = new MemoryStream();
-    context.Response.Body = memoryStream;
-
-    await next(context);
-
-    if (options?.StatusCodeValue != null)
+    if (_newStream != null)
     {
-      context.Response.StatusCode = (int)options.StatusCodeValue;
-      memoryStream.Seek(0, SeekOrigin.Begin);
-      await memoryStream.CopyToAsync(originalBodyStream);
-      context.Response.Body = originalBodyStream;
-      return;
+      _newStream.Dispose();
     }
   }
 
-  public bool ShouldApply(SteadybitFailureOptions options)
+  public Task ExecuteBeforeAsync(HttpContext context, SteadybitFailureOptions options)
   {
-    return options.StatusCodeValue.HasValue;
+    _startingBodyStream = context.Response.Body;
+    var memoryStream = new MemoryStream();
+    context.Response.Body = memoryStream;
+    return Task.CompletedTask;
+  }
+  public async Task ExecuteAfterAsync(HttpContext context, SteadybitFailureOptions options)
+  {
+    if (options?.StatusCodeValue != null && _newStream != null && _startingBodyStream != null)
+    {
+      context.Response.StatusCode = (int)options.StatusCodeValue;
+      _newStream.Seek(0, SeekOrigin.Begin);
+      await _newStream.CopyToAsync(_startingBodyStream);
+      context.Response.Body = _startingBodyStream;
+      return;
+    }
   }
 }

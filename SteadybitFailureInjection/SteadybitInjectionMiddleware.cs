@@ -59,11 +59,17 @@ public class SteadybitInjectionMiddleware
 
     foreach (var failure in _failures)
     {
-        Console.WriteLine($"Executing failure: {failure.GetType().Name} with priority {failure.Priority}");
-        await failure.ExecuteAsync(_next, context, options);
+        Console.WriteLine($"Executing before failure: {failure.GetType().Name} with priority {failure.Priority}");
+        await failure.ExecuteBeforeAsync(context, options);
     }
 
     await _next(context);
+
+    foreach (var failure in _failures)
+    {
+        Console.WriteLine($"Executing after failure: {failure.GetType().Name} with priority {failure.Priority}");
+        await failure.ExecuteAfterAsync(context, options);
+    }
   }
 }
 

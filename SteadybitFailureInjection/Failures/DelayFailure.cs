@@ -6,7 +6,12 @@ public class DelayFailure : ISteadybitFailure
 {
   public int Priority => 1;
 
-  public async Task ExecuteAsync(RequestDelegate next, HttpContext context, SteadybitFailureOptions options)
+  public Task ExecuteAfterAsync(HttpContext context, SteadybitFailureOptions options)
+  {
+    return Task.CompletedTask;
+  }
+
+  public async Task ExecuteBeforeAsync(HttpContext context, SteadybitFailureOptions options)
   {
       if (!(options?.Delay != null &&
          options.Delay.MinimumLatencyValue.HasValue &&

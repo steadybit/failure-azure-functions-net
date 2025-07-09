@@ -6,7 +6,12 @@ public class ExceptionFailure : ISteadybitFailure
 {
   public int Priority => 0;
 
-  public Task ExecuteAsync(RequestDelegate next, HttpContext context, SteadybitFailureOptions options)
+  public Task ExecuteAfterAsync(HttpContext context, SteadybitFailureOptions options)
+  {
+    return Task.CompletedTask;
+  }
+
+  public Task ExecuteBeforeAsync(HttpContext context, SteadybitFailureOptions options)
   {
       if (options.Exception?.Message == null)
       {

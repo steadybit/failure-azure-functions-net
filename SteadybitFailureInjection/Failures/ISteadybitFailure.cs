@@ -5,5 +5,6 @@ namespace SteadybitFailureInjection.Failures;
 public interface ISteadybitFailure
 {
   int Priority { get; }
-  Task ExecuteAsync(RequestDelegate next, HttpContext context, SteadybitFailureOptions options);
+  Task ExecuteBeforeAsync(HttpContext context, SteadybitFailureOptions options);
+  Task ExecuteAfterAsync(HttpContext context, SteadybitFailureOptions options);
 }
