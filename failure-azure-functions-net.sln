@@ -2,7 +2,7 @@
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteadybitFailureInjection", "SteadybitFailureInjection\SteadybitFailureInjection.csproj", "{822EC9E6-AFB8-409E-B924-42CDC0516F09}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteadybitFaultInjection", "SteadybitFaultInjection\SteadybitFaultInjection.csproj", "{822EC9E6-AFB8-409E-B924-42CDC0516F09}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteadybitHttpTrigger", "SteadybitHttpTrigger\SteadybitHttpTrigger.csproj", "{C52B332F-485B-4803-9C71-D258457D6FC3}"
 EndProject

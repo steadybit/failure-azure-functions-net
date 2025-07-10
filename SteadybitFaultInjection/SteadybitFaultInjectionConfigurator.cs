@@ -1,14 +1,16 @@
+using System.Net;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Microsoft.Extensions.DependencyInjection;
 using SteadybitFailureInjection.Failures;
 
-public static class SteadybitFailureInjectionConfigurator
+public static class SteadybitFaultInjectionConfigurator
 {
   public static string SteadybitFailureInjectionPrefix = "Steadybit:FaultInjection";
   public static string SteadybitFailureFeatureFlag = "SteadybitFaultInjectionEnabled";
 
 
-  public static void ConfigureSteadybitFailureInjection(this AzureAppConfigurationOptions options)
+  public static void ConfigureSteadybitFaultInjection(this AzureAppConfigurationOptions options)
   {
     options.Select($"{SteadybitFailureInjectionPrefix}:*", LabelFilter.Null)
     .ConfigureRefresh(refresh =>
@@ -23,8 +25,19 @@ public static class SteadybitFailureInjectionConfigurator
 
   public static void AddSteadybitFailureServices(this IServiceCollection services)
   {
-    services.AddScoped<ISteadybitFailure, DelayFailure>();
-    services.AddScoped<ISteadybitFailure, ExceptionFailure>();
-    services.AddScoped<ISteadybitFailure, StatusCodeFailure>();
+    services.AddScoped<ISteadybitInjection, DelayFailure>();
+    services.AddScoped<ISteadybitInjection, ExceptionInjection>();
+    services.AddScoped<ISteadybitInjection, StatusCodeFailure>();
+  }
+  
+
+  public static async Task<HttpResponseData> ReturnStatus(this HttpRequestData req, HttpStatusCode status, string body = null)
+  {
+      var result = req.CreateResponse(status);
+      if (!string.IsNullOrEmpty(body))
+      {
+          await result.WriteStringAsync(body);
+      }
+      return result;
   }
 }

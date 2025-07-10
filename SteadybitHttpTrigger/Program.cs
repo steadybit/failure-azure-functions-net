@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.FeatureManagement;
 using SteadybitFailureInjection;
+using SteadybitFaultInjection;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
@@ -13,7 +14,7 @@ string endpoint = "https://failureinjectionconfiguration.azconfig.io";
 
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
-  options.Connect(new Uri(endpoint), new DefaultAzureCredential()).ConfigureSteadybitFailureInjection();
+  options.Connect(new Uri(endpoint), new DefaultAzureCredential()).ConfigureSteadybitFaultInjection();
 });
 
 builder.Services.AddAzureAppConfiguration();

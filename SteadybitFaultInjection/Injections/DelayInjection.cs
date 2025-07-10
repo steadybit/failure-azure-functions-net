@@ -1,18 +1,19 @@
-using Microsoft.AspNetCore.Http;
+
 using Microsoft.Azure.Functions.Worker;
+using SteadybitFaultInjection;
 
 namespace SteadybitFailureInjection.Failures;
 
-public class DelayFailure : ISteadybitFailure
+public class DelayFailure : ISteadybitInjection
 {
   public int Priority => 1;
 
-  public Task ExecuteAfterAsync(FunctionContext context, SteadybitFailureOptions options)
+  public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
   {
     return Task.CompletedTask;
   }
 
-  public async Task ExecuteBeforeAsync(FunctionContext context, SteadybitFailureOptions options)
+  public async Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
   {
       if (!(options?.Delay != null &&
          options.Delay.MinimumLatencyValue.HasValue &&

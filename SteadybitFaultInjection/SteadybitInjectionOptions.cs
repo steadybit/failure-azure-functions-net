@@ -1,14 +1,14 @@
 using System.Net;
 
-namespace SteadybitFailureInjection;
+namespace SteadybitFaultInjection;
 
-public class SteadybitFailureOptions
+public class SteadybitInjectionOptions
 {
   public string Revision { get; set; }
 
-  public SteadybitDelayFailureOptions? Delay { get; set; }
+  public SteadybitDelayInjectionOptions? Delay { get; set; }
 
-  public SteadybitExceptionFailureOptions? Exception { get; set; }
+  public SteadybitExceptionInjectionOptions? Exception { get; set; }
 
   private string? _statusCode;
   public string? StatusCode
@@ -31,7 +31,7 @@ public class SteadybitFailureOptions
   }
 }
 
-public class SteadybitDelayFailureOptions
+public class SteadybitDelayInjectionOptions
 {
   private string? _rate;
   public string? Rate
@@ -82,7 +82,7 @@ public class SteadybitDelayFailureOptions
   }
 }
 
-public class SteadybitExceptionFailureOptions
+public class SteadybitExceptionInjectionOptions
 {
   private string? _message;
   public string? Message

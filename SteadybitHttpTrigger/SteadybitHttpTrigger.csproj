@@ -21,6 +21,6 @@
 
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SteadybitFailureInjection\SteadybitFailureInjection.csproj" />
+    <ProjectReference Include="..\SteadybitFaultInjection\SteadybitFaultInjection.csproj" />
   </ItemGroup>
 </Project>

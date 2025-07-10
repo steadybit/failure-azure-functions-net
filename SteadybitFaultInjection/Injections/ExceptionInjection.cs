@@ -1,18 +1,19 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
+using SteadybitFaultInjection;
 
 namespace SteadybitFailureInjection.Failures;
 
-public class ExceptionFailure : ISteadybitFailure
+public class ExceptionInjection : ISteadybitInjection 
 {
   public int Priority => 0;
 
-  public Task ExecuteAfterAsync(FunctionContext context, SteadybitFailureOptions options)
+  public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
   {
     return Task.CompletedTask;
   }
 
-  public Task ExecuteBeforeAsync(FunctionContext context, SteadybitFailureOptions options)
+  public Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
   {
       if (options.Exception?.Message == null)
       {

@@ -1,23 +1,21 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.Functions.Worker;
+﻿using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
 using SteadybitFailureInjection.Failures;
 
-namespace SteadybitFailureInjection;
+namespace SteadybitFaultInjection;
 
-public class SteadybitInjectionMiddleware: IFunctionsWorkerMiddleware
+public class SteadybitInjectionMiddleware : IFunctionsWorkerMiddleware
 {
   private readonly IConfiguration _configuration;
   private readonly IFeatureManager _featureManager;
   private readonly ILogger _logger;
-  private readonly IEnumerable<ISteadybitFailure> _failures;
+  private readonly IEnumerable<ISteadybitInjection> _failures;
 
-  public SteadybitInjectionMiddleware(IConfiguration configuration, IFeatureManager featureManager, ILoggerFactory? loggerFactory, IEnumerable<ISteadybitFailure> failures)
+  public SteadybitInjectionMiddleware(IConfiguration configuration, IFeatureManager featureManager, ILoggerFactory? loggerFactory, IEnumerable<ISteadybitInjection> failures)
   {
     _configuration = configuration;
     _featureManager = featureManager;
@@ -30,9 +28,9 @@ public class SteadybitInjectionMiddleware: IFunctionsWorkerMiddleware
     return await _featureManager.IsEnabledAsync("SteadybitFaultInjectionEnabled");
   }
 
-  public SteadybitFailureOptions GetSteadybitFailureOptionsAsync()
+  public SteadybitInjectionOptions GetSteadybitFailureOptionsAsync()
   {
-    var options = new SteadybitFailureOptions();
+    var options = new SteadybitInjectionOptions();
     IConfigurationSection section = _configuration.GetSection("Steadybit:FaultInjection");
     section.Bind(options);
 
@@ -47,7 +45,7 @@ public class SteadybitInjectionMiddleware: IFunctionsWorkerMiddleware
       return;
     }
 
-    var options = GetSteadybitFailureOptionsAsync(); 
+    var options = GetSteadybitFailureOptionsAsync();
 
     if (options?.Revision == null)
     {
@@ -66,8 +64,8 @@ public class SteadybitInjectionMiddleware: IFunctionsWorkerMiddleware
 
     foreach (var failure in _failures)
     {
-        Console.WriteLine($"Executing after failure: {failure.GetType().Name} with priority {failure.Priority}");
-        await failure.ExecuteAfterAsync(context, options);
+      Console.WriteLine($"Executing after failure: {failure.GetType().Name} with priority {failure.Priority}");
+      await failure.ExecuteAfterAsync(context, options);
     }
   }
 }
