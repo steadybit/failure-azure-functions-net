@@ -14,7 +14,9 @@ string endpoint = "https://failureinjectionconfiguration.azconfig.io";
 
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
-  options.Connect(new Uri(endpoint), new DefaultAzureCredential()).ConfigureSteadybitFaultInjection();
+    options
+        .Connect(new Uri(endpoint), new DefaultAzureCredential())
+        .ConfigureSteadybitFaultInjection();
 });
 
 builder.Services.AddAzureAppConfiguration();
@@ -27,8 +29,8 @@ builder.UseAzureAppConfiguration();
 
 builder.UseMiddleware<SteadybitInjectionMiddleware>();
 
-builder.Services
-    .AddApplicationInsightsTelemetryWorkerService()
+builder
+    .Services.AddApplicationInsightsTelemetryWorkerService()
     .ConfigureFunctionsApplicationInsights();
 
 builder.Build().Run();

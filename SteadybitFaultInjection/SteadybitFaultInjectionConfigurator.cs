@@ -6,38 +6,44 @@ using SteadybitFailureInjection.Failures;
 
 public static class SteadybitFaultInjectionConfigurator
 {
-  public static string SteadybitFailureInjectionPrefix = "Steadybit:FaultInjection";
-  public static string SteadybitFailureFeatureFlag = "SteadybitFaultInjectionEnabled";
+    public static string SteadybitFailureInjectionPrefix = "Steadybit:FaultInjection";
+    public static string SteadybitFailureFeatureFlag = "SteadybitFaultInjectionEnabled";
 
-
-  public static void ConfigureSteadybitFaultInjection(this AzureAppConfigurationOptions options)
-  {
-    options.Select($"{SteadybitFailureInjectionPrefix}:*", LabelFilter.Null)
-    .ConfigureRefresh(refresh =>
+    public static void ConfigureSteadybitFaultInjection(this AzureAppConfigurationOptions options)
     {
-      refresh.Register($"{SteadybitFailureInjectionPrefix}:Revision", refreshAll: true).SetRefreshInterval(TimeSpan.FromSeconds(30));
-    }).UseFeatureFlags(featureFlagOptions =>
+        options
+            .Select($"{SteadybitFailureInjectionPrefix}:*", LabelFilter.Null)
+            .ConfigureRefresh(refresh =>
+            {
+                refresh
+                    .Register($"{SteadybitFailureInjectionPrefix}:Revision", refreshAll: true)
+                    .SetRefreshInterval(TimeSpan.FromSeconds(30));
+            })
+            .UseFeatureFlags(featureFlagOptions =>
+            {
+                featureFlagOptions.Select(SteadybitFailureFeatureFlag, LabelFilter.Null);
+                featureFlagOptions.SetRefreshInterval(TimeSpan.FromSeconds(30));
+            });
+    }
+
+    public static void AddSteadybitFailureServices(this IServiceCollection services)
     {
-      featureFlagOptions.Select(SteadybitFailureFeatureFlag, LabelFilter.Null);
-      featureFlagOptions.SetRefreshInterval(TimeSpan.FromSeconds(30));
-    });
-  }
+        services.AddScoped<ISteadybitInjection, DelayFailure>();
+        services.AddScoped<ISteadybitInjection, ExceptionInjection>();
+        services.AddScoped<ISteadybitInjection, StatusCodeFailure>();
+    }
 
-  public static void AddSteadybitFailureServices(this IServiceCollection services)
-  {
-    services.AddScoped<ISteadybitInjection, DelayFailure>();
-    services.AddScoped<ISteadybitInjection, ExceptionInjection>();
-    services.AddScoped<ISteadybitInjection, StatusCodeFailure>();
-  }
-  
-
-  public static async Task<HttpResponseData> ReturnStatus(this HttpRequestData req, HttpStatusCode status, string body = null)
-  {
-      var result = req.CreateResponse(status);
-      if (!string.IsNullOrEmpty(body))
-      {
-          await result.WriteStringAsync(body);
-      }
-      return result;
-  }
+    public static async Task<HttpResponseData> ReturnStatus(
+        this HttpRequestData req,
+        HttpStatusCode status,
+        string body = null
+    )
+    {
+        var result = req.CreateResponse(status);
+        if (!string.IsNullOrEmpty(body))
+        {
+            await result.WriteStringAsync(body);
+        }
+        return result;
+    }
 }
