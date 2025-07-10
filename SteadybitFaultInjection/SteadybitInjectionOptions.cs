@@ -4,11 +4,14 @@ namespace SteadybitFaultInjection;
 
 public class SteadybitInjectionOptions
 {
-    public string Revision { get; set; }
+    public string? Revision { get; set; }
+    public string? Injection { get; set; }
 
     public SteadybitDelayInjectionOptions? Delay { get; set; }
 
     public SteadybitExceptionInjectionOptions? Exception { get; set; }
+
+    public SteadybitBlockInjectionOptions? Block { get; set; }
 
     private string? _statusCode;
     public string? StatusCode
@@ -92,5 +95,32 @@ public class SteadybitExceptionInjectionOptions
     {
         get => _message;
         set => _message = value;
+    }
+}
+
+public class SteadybitBlockInjectionOptions
+{
+    string? _hosts;
+
+    public string? Hosts
+    {
+        get => _hosts;
+        set => _hosts = value;
+    }
+
+    public IEnumerable<string> HostsValue
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(_hosts))
+            {
+                return Array.Empty<string>();
+            }
+
+            return _hosts
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(host => host.Trim())
+                .Where(host => !string.IsNullOrEmpty(host));
+        }
     }
 }

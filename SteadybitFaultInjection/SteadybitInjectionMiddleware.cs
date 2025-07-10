@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Functions.Worker;
+﻿using Microsoft.AspNetCore.Rewrite;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -13,13 +14,13 @@ public class SteadybitInjectionMiddleware : IFunctionsWorkerMiddleware
     private readonly IConfiguration _configuration;
     private readonly IFeatureManager _featureManager;
     private readonly ILogger _logger;
-    private readonly IEnumerable<ISteadybitInjection> _failures;
+    private readonly IEnumerable<ISteadybitInjection> _injections;
 
     public SteadybitInjectionMiddleware(
         IConfiguration configuration,
         IFeatureManager featureManager,
         ILoggerFactory? loggerFactory,
-        IEnumerable<ISteadybitInjection> failures
+        IEnumerable<ISteadybitInjection> injections
     )
     {
         _configuration = configuration;
@@ -27,12 +28,31 @@ public class SteadybitInjectionMiddleware : IFunctionsWorkerMiddleware
         _logger =
             loggerFactory?.CreateLogger<SteadybitInjectionMiddleware>()
             ?? NullLoggerFactory.Instance.CreateLogger<SteadybitInjectionMiddleware>();
-        _failures = failures;
+        _injections = injections;
     }
 
     public async Task<bool> IsMiddlewareEnabledAsync()
     {
         return await _featureManager.IsEnabledAsync("SteadybitFaultInjectionEnabled");
+    }
+
+    public bool IsValidInjection(
+        SteadybitInjectionOptions options,
+        IEnumerable<ISteadybitInjection> injections
+    )
+    {
+        if (options.Injection == null)
+        {
+            return false;
+        }
+
+        return !injections.Any(injection =>
+            nameof(injection).ToLower() == options.Injection.ToLower()
+            || (
+                nameof(injection).Contains("Injection")
+                && nameof(injection).Split("Injection")[0].ToLower() == options.Injection.ToLower()
+            )
+        );
     }
 
     public SteadybitInjectionOptions GetSteadybitFailureOptionsAsync()
@@ -54,6 +74,15 @@ public class SteadybitInjectionMiddleware : IFunctionsWorkerMiddleware
 
         var options = GetSteadybitFailureOptionsAsync();
 
+        if (!IsValidInjection(options, _injections))
+        {
+            await next(context);
+            _logger.LogWarning(
+                "Key Steadybit:FaultInjection:Injection is not set or invalid. Middleware won't be executed."
+            );
+            return;
+        }
+
         if (options?.Revision == null)
         {
             await next(context);
@@ -63,21 +92,24 @@ public class SteadybitInjectionMiddleware : IFunctionsWorkerMiddleware
             return;
         }
 
-        foreach (var failure in _failures)
+        foreach (var failure in _injections)
         {
-            Console.WriteLine(
-                $"Executing before failure: {failure.GetType().Name} with priority {failure.Priority}"
-            );
             await failure.ExecuteBeforeAsync(context, options);
+
+            if (
+                failure is ISteadybitInjectionWithTermination injectionWithTermination
+                && injectionWithTermination.ShouldTerminate
+            )
+            {
+                await next(context);
+                return;
+            }
         }
 
         await next(context);
 
-        foreach (var failure in _failures)
+        foreach (var failure in _injections)
         {
-            Console.WriteLine(
-                $"Executing after failure: {failure.GetType().Name} with priority {failure.Priority}"
-            );
             await failure.ExecuteAfterAsync(context, options);
         }
     }

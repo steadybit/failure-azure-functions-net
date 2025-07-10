@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.FeatureManagement;
-using SteadybitFailureInjection;
 using SteadybitFaultInjection;
 
 var builder = FunctionsApplication.CreateBuilder(args);

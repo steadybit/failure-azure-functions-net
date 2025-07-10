@@ -5,8 +5,6 @@ namespace SteadybitFailureInjection.Failures;
 
 public class DelayFailure : ISteadybitInjection
 {
-    public int Priority => 1;
-
     public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
     {
         return Task.CompletedTask;

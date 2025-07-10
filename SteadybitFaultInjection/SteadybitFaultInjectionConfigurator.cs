@@ -31,6 +31,7 @@ public static class SteadybitFaultInjectionConfigurator
         services.AddScoped<ISteadybitInjection, DelayFailure>();
         services.AddScoped<ISteadybitInjection, ExceptionInjection>();
         services.AddScoped<ISteadybitInjection, StatusCodeFailure>();
+        services.AddScoped<ISteadybitInjection, BlockInjection>();
     }
 
     public static async Task<HttpResponseData> ReturnStatus(

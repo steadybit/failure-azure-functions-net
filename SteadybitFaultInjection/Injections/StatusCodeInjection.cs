@@ -14,7 +14,6 @@ public class SteadybitException : Exception
 public class StatusCodeFailure : ISteadybitInjection
 {
     private HttpRequestData? _httpRequestData;
-    public int Priority => 100; // Should always be executed last.
 
     public async Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
     {
