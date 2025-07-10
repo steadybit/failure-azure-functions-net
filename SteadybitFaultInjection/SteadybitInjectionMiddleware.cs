@@ -36,17 +36,17 @@ public class SteadybitInjectionMiddleware : IFunctionsWorkerMiddleware
         return await _featureManager.IsEnabledAsync("SteadybitFaultInjectionEnabled");
     }
 
-    public bool IsValidInjection(
+    public ISteadybitInjection? GetInjectionToExecute(
         SteadybitInjectionOptions options,
         IEnumerable<ISteadybitInjection> injections
     )
     {
         if (options.Injection == null)
         {
-            return false;
+            return null;
         }
 
-        return !injections.Any(injection =>
+        return injections.FirstOrDefault(injection =>
             nameof(injection).ToLower() == options.Injection.ToLower()
             || (
                 nameof(injection).Contains("Injection")
@@ -74,7 +74,9 @@ public class SteadybitInjectionMiddleware : IFunctionsWorkerMiddleware
 
         var options = GetSteadybitFailureOptionsAsync();
 
-        if (!IsValidInjection(options, _injections))
+        var injection = GetInjectionToExecute(options, _injections);
+
+        if (injection == null)
         {
             await next(context);
             _logger.LogWarning(
@@ -92,25 +94,19 @@ public class SteadybitInjectionMiddleware : IFunctionsWorkerMiddleware
             return;
         }
 
-        foreach (var failure in _injections)
-        {
-            await failure.ExecuteBeforeAsync(context, options);
+        await injection.ExecuteBeforeAsync(context, options);
 
-            if (
-                failure is ISteadybitInjectionWithTermination injectionWithTermination
-                && injectionWithTermination.ShouldTerminate
-            )
-            {
-                await next(context);
-                return;
-            }
+        if (
+            injection is ISteadybitInjectionWithTermination injectionWithTermination
+            && injectionWithTermination.ShouldTerminate
+        )
+        {
+            await next(context);
+            return;
         }
 
         await next(context);
 
-        foreach (var failure in _injections)
-        {
-            await failure.ExecuteAfterAsync(context, options);
-        }
+        await injection.ExecuteAfterAsync(context, options);
     }
 }

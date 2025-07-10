@@ -13,6 +13,8 @@ public class SteadybitInjectionOptions
 
     public SteadybitBlockInjectionOptions? Block { get; set; }
 
+    public SteadybitFillDiskInjectionOptions? FillDisk { get; set; }
+
     private string? _statusCode;
     public string? StatusCode
     {
@@ -121,6 +123,29 @@ public class SteadybitBlockInjectionOptions
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(host => host.Trim())
                 .Where(host => !string.IsNullOrEmpty(host));
+        }
+    }
+}
+
+public class SteadybitFillDiskInjectionOptions
+{
+    string? _megabytes;
+
+    public string? Megabytes
+    {
+        get => _megabytes;
+        set => _megabytes = value;
+    }
+
+    public int? MegabytesValue
+    {
+        get
+        {
+            if (int.TryParse(_megabytes, out int megabytesValue) && megabytesValue > 0)
+            {
+                return megabytesValue;
+            }
+            return null;
         }
     }
 }
