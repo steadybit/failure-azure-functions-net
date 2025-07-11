@@ -1,0 +1,83 @@
+name: ci
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      sonar_available: ${{ secrets.SONAR_TOKEN != '' && 'true' || 'false' }}
+      snyk_available: ${{ secrets.SNYK_TOKEN  != '' && 'true' || 'false' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - run: dotnet build --configuration Release
+
+      - name: "[release] Snyk test"
+        if: ${{ startsWith(github.ref, 'refs/tags/') && env.snyk_available == 'true' }}
+        uses: snyk/actions/golang@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --org=${{ vars.SNYK_ORG_ID }} --severity-threshold=high --project-name=${{ github.repository }} --target-reference=${{ github.ref_name }}
+          command: test
+
+      - name: SonarCloud scan
+        if: ${{ env.sonar_available == 'true' }}
+        uses: sonarsource/sonarqube-scan-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: "[release] SonarCloud Quality Gate check"
+        if: ${{  startsWith(github.ref, 'refs/tags/') && env.sonar_available == 'true' }}
+        uses: sonarsource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: audit
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - run: dotnet build --configuration Release --no-restore
+
+      - name: "[release] Publish"
+        working-directory: ./SteadybitFaultInjection/bin/Release/net8.0/
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+        env:
+          API_KEY: ${{ secrets.NUGET_API_KEY }}
