@@ -24,9 +24,11 @@ builder.Services.AddFeatureManagement();
 
 builder.Services.AddSteadybitFailureServices();
 
-builder.UseAzureAppConfiguration();
+var config = builder.Configuration;
 
 builder.UseMiddleware<SteadybitInjectionMiddleware>();
+
+builder.UseAzureAppConfiguration();
 
 builder
     .Services.AddApplicationInsightsTelemetryWorkerService()

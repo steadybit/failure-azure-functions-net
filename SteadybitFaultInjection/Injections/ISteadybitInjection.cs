@@ -2,7 +2,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using SteadybitFaultInjection;
 
-namespace SteadybitFailureInjection.Failures;
+namespace SteadybitFaultInjections.Injections;
 
 public interface ISteadybitInjection
 {

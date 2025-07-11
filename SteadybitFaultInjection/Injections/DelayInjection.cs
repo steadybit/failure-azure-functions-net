@@ -1,10 +1,19 @@
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Logging;
 using SteadybitFaultInjection;
+using SteadybitFaultInjection.Injections;
 
-namespace SteadybitFailureInjection.Failures;
+namespace SteadybitFaultInjections.Injections;
 
 public class DelayFailure : ISteadybitInjection
 {
+    private readonly ILogger<DelayFailure> _logger;
+
+    public DelayFailure(ILogger<DelayFailure> logger)
+    {
+        _logger = logger;
+    }
+
     public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
     {
         return Task.CompletedTask;
@@ -12,30 +21,35 @@ public class DelayFailure : ISteadybitInjection
 
     public async Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
     {
-        if (
-            !(
-                options?.Delay != null
-                && options.Delay.MinimumLatencyValue.HasValue
-                && options.Delay.MaximumLatencyValue.HasValue
-                && options.Delay.RateValue.HasValue
-            )
-        )
+        if (options?.Delay == null)
         {
+            _logger.LogWarning(
+                "Keys Steadybit:Injection:Delay:MinimumLatency and Steadybit:Injection:Delay:MaximumLatency are not provided, skipping injection..."
+            );
             return;
         }
 
-        int rate = options.Delay.RateValue.Value;
-        if (rate <= 0 || rate > 100)
+        if (!options.Delay.MinimumLatencyValue.HasValue)
         {
-            // _logger.LogError("Invalid rate value. It should be between 1 and 100.");
+            _logger.LogWarning(
+                "Key Steadybit:Injection:Delay:MinimumLatency is not provided or invalid, skipping injection..."
+            );
             return;
         }
 
-        Random random = new Random();
-        int randomValue = random.Next(1, 101);
-
-        if (randomValue > rate)
+        if (!options.Delay.MaximumLatencyValue.HasValue)
         {
+            _logger.LogWarning(
+                "Key Steadybit:Injection:Delay:MaximumLatency is not provided or invalid, skipping injection..."
+            );
+            return;
+        }
+
+        if (options.Delay.MaximumLatencyValue < options.Delay.MinimumLatencyValue)
+        {
+            _logger.LogWarning(
+                "Key Steadybit:Injection:Delay:MaximumLatency must be greater than or equal to Steadybit:Injection:Delay:MinimumLatency, skipping injection..."
+            );
             return;
         }
 
@@ -43,14 +57,12 @@ public class DelayFailure : ISteadybitInjection
         int maximumLatency = options.Delay.MaximumLatencyValue.Value;
         int delayRange = maximumLatency - minimumLatency;
 
-        if (delayRange < 0)
-        {
-            // _logger.LogError("Invalid latency range. Maximum latency must be greater than or equal to minimum latency.");
-            return;
-        }
-
         double delay =
             (double)options.Delay.MinimumLatencyValue + (delayRange * new Random().NextDouble());
+
+        _logger.LogInformation(
+            $"Injecting delay of {delay} milliseconds. Range: {minimumLatency} - {maximumLatency} milliseconds."
+        );
         await Task.Delay(TimeSpan.FromMilliseconds(delay));
     }
 }

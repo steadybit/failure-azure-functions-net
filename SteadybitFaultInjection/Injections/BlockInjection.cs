@@ -1,14 +1,21 @@
 using System.Net;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.Logging;
 using SteadybitFaultInjection;
+using SteadybitFaultInjection.Injections;
 
-namespace SteadybitFailureInjection.Failures;
+namespace SteadybitFaultInjections.Injections;
 
 public class BlockInjection : ISteadybitInjectionWithTermination
 {
+    private readonly ILogger<BlockInjection> _logger;
     public bool ShouldTerminate { get; set; } = false;
+
+    public BlockInjection(ILogger<BlockInjection> logger)
+    {
+        _logger = logger;
+    }
 
     public async Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
     {
@@ -16,7 +23,9 @@ public class BlockInjection : ISteadybitInjectionWithTermination
 
         if (request == null)
         {
-            ShouldTerminate = false;
+            _logger.LogDebug(
+                "HttpRequestData is not present, might not be using HTTP Trigger, skipping injection..."
+            );
             return;
         }
 
@@ -29,35 +38,45 @@ public class BlockInjection : ISteadybitInjectionWithTermination
             }
         }
 
-        // Console.WriteLine($"BlockInjection: Host = {host ?? "null"}");
-        // Console.WriteLine(
-        //     $"BlockInjection: HostsValue = {(options.Block?.HostsValue != null ? string.Join(", ", options.Block.HostsValue) : "null")}"
-        // );
-        if (
-            host != null
-            && options.Block != null
-            && options.Block.HostsValue.Count() > 0
-            && options.Block.HostsValue.Contains(host)
-        )
+        if (host == null)
         {
-            var customResponse = request.CreateResponse(HttpStatusCode.Forbidden);
-            var body = new MemoryStream();
-            body.Write(
-                System.Text.Encoding.UTF8.GetBytes(
-                    "This request has been blocked by Steadybit Fault Injection Middleware."
-                )
+            _logger.LogWarning(
+                "Host header is not present in the request, skipping block injection."
             );
-            body.Seek(0, SeekOrigin.Begin);
-            customResponse.Body = body;
-
-            context.GetInvocationResult().Value = customResponse;
-            ShouldTerminate = true;
+            return;
         }
+
+        if (options?.Block?.Hosts == null || options.Block.HostsValue.Count() == 0)
+        {
+            _logger.LogWarning(
+                "Keys Steadybit:Injection:Block:Hosts option is not provided or invalid, skipping block injection..."
+            );
+            return;
+        }
+
+        if (!options.Block.HostsValue.Contains(host))
+        {
+            _logger.LogDebug($"Host '{host}' is not in the block list, skipping block injection.");
+            return;
+        }
+
+        var customResponse = request.CreateResponse(HttpStatusCode.Forbidden);
+        var body = new MemoryStream();
+        body.Write(
+            System.Text.Encoding.UTF8.GetBytes(
+                "This request has been blocked by Steadybit Fault Injection Middleware."
+            )
+        );
+        body.Seek(0, SeekOrigin.Begin);
+        customResponse.Body = body;
+
+        context.GetInvocationResult().Value = customResponse;
+        _logger.LogInformation($"Injected block response for host: {host}.");
+        ShouldTerminate = true;
     }
 
     public Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
     {
-        ShouldTerminate = false;
         return Task.CompletedTask;
     }
 }

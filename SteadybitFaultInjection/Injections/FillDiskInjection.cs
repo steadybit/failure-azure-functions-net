@@ -1,22 +1,32 @@
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Identity.Client;
+using Microsoft.Extensions.Logging;
 using SteadybitFaultInjection;
+using SteadybitFaultInjection.Injections;
 
-namespace SteadybitFailureInjection.Failures;
+namespace SteadybitFaultInjections.Injections;
 
 public class FillDiskInjection : ISteadybitInjection
 {
+    private readonly ILogger<FillDiskInjection> _logger;
+
+    public FillDiskInjection(ILogger<FillDiskInjection> logger)
+    {
+        _logger = logger;
+    }
+
     public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
     {
-        if (options.FillDisk == null || options.FillDisk.MegabytesValue == null)
+        if (options?.FillDisk == null || options.FillDisk.MegabytesValue == null)
         {
+            _logger.LogWarning(
+                "Key Steadybit:Injection:FillDisk:Megabytes is not provided or invalid, skipping injection..."
+            );
             return Task.CompletedTask;
         }
 
         var tempPath = Path.GetTempPath();
         var tempFilePath = Path.Join(tempPath, "Steadybit GmbH", $"fill-disk-{Guid.NewGuid()}.txt");
         Directory.CreateDirectory(Path.GetDirectoryName(tempFilePath) ?? tempPath);
-        Console.WriteLine($"Creating file at: {tempFilePath}");
         var fileStream = File.OpenWrite(tempFilePath);
         byte[] buffer = new byte[1024 * 1024];
 
@@ -24,6 +34,10 @@ public class FillDiskInjection : ISteadybitInjection
         {
             fileStream.Write(buffer, 0, buffer.Length);
         }
+
+        _logger.LogInformation(
+            $"Injected disk fill of {options.FillDisk.MegabytesValue} MB at {tempFilePath}."
+        );
 
         return Task.CompletedTask;
     }

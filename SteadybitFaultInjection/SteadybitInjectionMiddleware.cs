@@ -1,39 +1,29 @@
-﻿using Microsoft.AspNetCore.Rewrite;
-using Microsoft.Azure.Functions.Worker;
+﻿using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.FeatureManagement;
-using SteadybitFailureInjection.Failures;
+using SteadybitFaultInjection.Injections;
+using SteadybitFaultInjections.Injections;
 
 namespace SteadybitFaultInjection;
 
 public class SteadybitInjectionMiddleware : IFunctionsWorkerMiddleware
 {
     private readonly IConfiguration _configuration;
-    private readonly IFeatureManager _featureManager;
     private readonly ILogger _logger;
     private readonly IEnumerable<ISteadybitInjection> _injections;
 
     public SteadybitInjectionMiddleware(
         IConfiguration configuration,
-        IFeatureManager featureManager,
-        ILoggerFactory? loggerFactory,
+        ILogger<SteadybitInjectionMiddleware> logger,
         IEnumerable<ISteadybitInjection> injections
     )
     {
         _configuration = configuration;
-        _featureManager = featureManager;
-        _logger =
-            loggerFactory?.CreateLogger<SteadybitInjectionMiddleware>()
-            ?? NullLoggerFactory.Instance.CreateLogger<SteadybitInjectionMiddleware>();
+        _logger = logger;
         _injections = injections;
-    }
-
-    public async Task<bool> IsMiddlewareEnabledAsync()
-    {
-        return await _featureManager.IsEnabledAsync("SteadybitFaultInjectionEnabled");
     }
 
     public ISteadybitInjection? GetInjectionToExecute(
@@ -46,13 +36,18 @@ public class SteadybitInjectionMiddleware : IFunctionsWorkerMiddleware
             return null;
         }
 
+        _logger.LogDebug($"Looking for injection with name: {options.Injection}");
+
+        foreach (var injection in injections)
+        {
+            _logger.LogDebug($"Injection exists: {injection.GetType().Name}");
+        }
+
         return injections.FirstOrDefault(injection =>
             injection.GetType().Name.ToLower() == options.Injection.ToLower()
-            || (
-                injection.GetType().Name.Contains("Injection")
-                && injection.GetType().Name.Split("Injection")[0].ToLower()
-                    == options.Injection.ToLower()
-            )
+            || injection
+                .GetType()
+                .Name.StartsWith(options.Injection, StringComparison.OrdinalIgnoreCase)
         );
     }
 
@@ -67,13 +62,34 @@ public class SteadybitInjectionMiddleware : IFunctionsWorkerMiddleware
 
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {
-        if (!await IsMiddlewareEnabledAsync())
+        var options = GetSteadybitFailureOptionsAsync();
+
+        if (!options.EnabledValue)
         {
+            _logger.LogDebug(
+                "Steadybit Fault Injection is disabled. Middleware won't be executed."
+            );
             await next(context);
             return;
         }
 
-        var options = GetSteadybitFailureOptionsAsync();
+        if (!InjectionHelper.IsValidRate(options.RateValue))
+        {
+            _logger.LogWarning(
+                "Key Steadybit:FaultInjection:Rate is not provided or invalid, skipping injection..."
+            );
+            await next(context);
+            return;
+        }
+
+        if (!InjectionHelper.ShouldExecuteBasedOnRate((int)options.RateValue!, out int rateValue))
+        {
+            _logger.LogWarning(
+                $"Rate is not met (<= {rateValue}), skipping delay injection. Rate: {options.RateValue}."
+            );
+            await next(context);
+            return;
+        }
 
         var injection = GetInjectionToExecute(options, _injections);
 

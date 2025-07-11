@@ -37,10 +37,24 @@ public class SteadybitInjectionOptions
             return null;
         }
     }
-}
 
-public class SteadybitDelayInjectionOptions
-{
+    public string? Enabled { get; set; }
+
+    public bool EnabledValue
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(Enabled))
+            {
+                return false;
+            }
+
+            return Enabled.Equals("true", StringComparison.OrdinalIgnoreCase)
+                || Enabled.Equals("1", StringComparison.OrdinalIgnoreCase)
+                || Enabled.Equals("yes", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     private string? _rate;
     public string? Rate
     {
@@ -56,7 +70,10 @@ public class SteadybitDelayInjectionOptions
             return success ? rateValue : null;
         }
     }
+}
 
+public class SteadybitDelayInjectionOptions
+{
     private string? _minimumLatency;
     public string? MinimumLatency
     {
