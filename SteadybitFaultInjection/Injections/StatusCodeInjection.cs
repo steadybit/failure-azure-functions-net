@@ -21,7 +21,7 @@ public class StatusCodeFailure : ISteadybitInjection
         _httpRequestData = request;
     }
 
-    public async Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
+    public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
     {
         var response = context.GetHttpResponseData();
         if (_httpRequestData != null && options.StatusCodeValue.HasValue && response != null)
@@ -34,5 +34,7 @@ public class StatusCodeFailure : ISteadybitInjection
 
             context.GetInvocationResult().Value = customResponse;
         }
+
+        return Task.CompletedTask;
     }
 }

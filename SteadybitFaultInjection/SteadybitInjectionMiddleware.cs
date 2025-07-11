@@ -47,10 +47,11 @@ public class SteadybitInjectionMiddleware : IFunctionsWorkerMiddleware
         }
 
         return injections.FirstOrDefault(injection =>
-            nameof(injection).ToLower() == options.Injection.ToLower()
+            injection.GetType().Name.ToLower() == options.Injection.ToLower()
             || (
-                nameof(injection).Contains("Injection")
-                && nameof(injection).Split("Injection")[0].ToLower() == options.Injection.ToLower()
+                injection.GetType().Name.Contains("Injection")
+                && injection.GetType().Name.Split("Injection")[0].ToLower()
+                    == options.Injection.ToLower()
             )
         );
     }
