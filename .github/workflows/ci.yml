@@ -36,7 +36,7 @@ jobs:
 
       - name: "[release] Snyk test"
         if: ${{ startsWith(github.ref, 'refs/tags/') && env.snyk_available == 'true' }}
-        uses: snyk/actions/golang@master
+        uses: snyk/actions/dotnet@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
