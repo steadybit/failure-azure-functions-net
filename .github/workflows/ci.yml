@@ -73,7 +73,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - run: dotnet build --configuration Release --no-restore
+      - run: dotnet build --configuration Release
 
       - name: "[release] Publish"
         working-directory: ./SteadybitFaultInjection/bin/Release/net8.0/
