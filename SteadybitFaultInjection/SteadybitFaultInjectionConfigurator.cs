@@ -1,8 +1,8 @@
-using System.Net;
-using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Microsoft.Extensions.DependencyInjection;
 using SteadybitFaultInjections.Injections;
+
+namespace SteadybitFaultInjections;
 
 public static class SteadybitFaultInjectionConfigurator
 {
