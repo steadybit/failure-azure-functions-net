@@ -2,7 +2,7 @@ using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Microsoft.Extensions.DependencyInjection;
 using SteadybitFaultInjections.Injections;
 
-namespace SteadybitFaultInjections;
+namespace SteadybitFaultInjection;
 
 public static class SteadybitFaultInjectionConfigurator
 {
