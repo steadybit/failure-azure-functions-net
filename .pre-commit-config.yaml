@@ -1,0 +1,21 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: dotnet-tool-restore
+        name: Install dotnet tools
+        language: system
+        entry: dotnet tool restore
+        pass_filenames: false
+        always_run: true
+      - id: csharpier
+        name: Run CSharpier on c# files
+        entry: dotnet tool run csharpier format .
+        language: system
+        types:
+          - c#
