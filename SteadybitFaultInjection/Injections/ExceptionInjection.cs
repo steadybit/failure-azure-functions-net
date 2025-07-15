@@ -16,11 +16,6 @@ public class ExceptionInjection : ISteadybitInjection
 
     public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
     {
-        return Task.CompletedTask;
-    }
-
-    public Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
-    {
         if (options?.Exception?.Message == null)
         {
             _logger.LogWarning(
@@ -34,5 +29,10 @@ public class ExceptionInjection : ISteadybitInjection
             options.Exception.Message
         );
         throw new Exception(options.Exception.Message);
+    }
+
+    public Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
+    {
+        return Task.CompletedTask;
     }
 }
