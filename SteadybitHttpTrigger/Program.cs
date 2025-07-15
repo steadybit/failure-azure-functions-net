@@ -9,7 +9,14 @@ using SteadybitFaultInjection;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
-string endpoint = "https://failureinjectionconfiguration.azconfig.io";
+var endpoint = Environment.GetEnvironmentVariable("AZURE_APP_CONFIG_ENDPOINT");
+
+if (string.IsNullOrEmpty(endpoint))
+{
+    throw new InvalidOperationException(
+        "AZURE_APP_CONFIG_ENDPOINT environment variable is not set."
+    );
+}
 
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
@@ -19,8 +26,6 @@ builder.Configuration.AddAzureAppConfiguration(options =>
 });
 
 builder.Services.AddAzureAppConfiguration();
-
-builder.Services.AddFeatureManagement();
 
 builder.Services.AddSteadybitFailureServices();
 
