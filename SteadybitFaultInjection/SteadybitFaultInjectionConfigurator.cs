@@ -31,10 +31,9 @@ public static class SteadybitFaultInjectionConfigurator
 
     public static void AddSteadybitFailureServices(this IServiceCollection services)
     {
-        services.AddScoped<ISteadybitInjection, DelayFailure>();
+        services.AddScoped<ISteadybitInjection, DelayInjection>();
         services.AddScoped<ISteadybitInjection, ExceptionInjection>();
         services.AddScoped<ISteadybitInjection, StatusCodeFailure>();
-        services.AddScoped<ISteadybitInjection, BlockInjection>();
         services.AddScoped<ISteadybitInjection, FillDiskInjection>();
     }
 }

@@ -32,6 +32,8 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - run: dotnet test
+
       - run: dotnet build --configuration Release
 
       - name: "[release] Snyk test"

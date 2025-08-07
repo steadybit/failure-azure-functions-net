@@ -5,11 +5,11 @@ using SteadybitFaultInjection.Injections;
 
 namespace SteadybitFaultInjections.Injections;
 
-public class DelayFailure : ISteadybitInjection
+public class DelayInjection : ISteadybitInjection
 {
-    private readonly ILogger<DelayFailure> _logger;
+    private readonly ILogger<DelayInjection> _logger;
 
-    public DelayFailure(ILogger<DelayFailure> logger)
+    public DelayInjection(ILogger<DelayInjection> logger)
     {
         _logger = logger;
     }
@@ -23,9 +23,7 @@ public class DelayFailure : ISteadybitInjection
     {
         if (options?.Delay == null)
         {
-            _logger.LogWarning(
-                "Keys Steadybit:Injection:Delay:MinimumLatency and Steadybit:Injection:Delay:MaximumLatency are not provided, skipping injection..."
-            );
+            _logger.LogWarning("Delay options are not provided, skipping injection...");
             return;
         }
 
