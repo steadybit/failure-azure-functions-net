@@ -50,10 +50,10 @@ namespace SteadybitFaultInjections.Injections.Tests
                         LogLevel.Warning,
                         It.IsAny<EventId>(),
                         It.Is<It.IsAnyType>(
-                            (o, t) => o.ToString().Contains("HttpRequestData is not present")
+                            (v, t) => v.ToString()!.Contains("HttpRequestData is not present")
                         ),
                         It.IsAny<Exception>(),
-                        It.IsAny<Func<It.IsAnyType, Exception, string>>()
+                        It.IsAny<Func<It.IsAnyType, Exception?, string>>()
                     ),
                 Times.Once
             );
@@ -78,10 +78,10 @@ namespace SteadybitFaultInjections.Injections.Tests
                         LogLevel.Warning,
                         It.IsAny<EventId>(),
                         It.Is<It.IsAnyType>(
-                            (o, t) => o.ToString().Contains("Steadybit:Injection:StatusCode")
+                            (v, t) => v.ToString()!.Contains("Steadybit:Injection:StatusCode")
                         ),
                         It.IsAny<Exception>(),
-                        It.IsAny<Func<It.IsAnyType, Exception, string>>()
+                        It.IsAny<Func<It.IsAnyType, Exception?, string>>()
                     ),
                 Times.AtLeast(1)
             );

@@ -61,7 +61,7 @@ public class DelayInjectionTests
                     Microsoft.Extensions.Logging.LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
-                        (v, t) => v.ToString().Contains("Delay options are not provided")
+                        (v, t) => v.ToString()!.Contains("Delay options are not provided")
                     ),
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()
@@ -96,7 +96,7 @@ public class DelayInjectionTests
                     Microsoft.Extensions.Logging.LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
-                        (v, t) => v.ToString().Contains("Steadybit:Injection:Delay:MinimumLatency")
+                        (v, t) => v.ToString()!.Contains("Steadybit:Injection:Delay:MinimumLatency")
                     ),
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()
@@ -131,7 +131,7 @@ public class DelayInjectionTests
                     Microsoft.Extensions.Logging.LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
-                        (v, t) => v.ToString().Contains("Steadybit:Injection:Delay:MaximumLatency")
+                        (v, t) => v.ToString()!.Contains("Steadybit:Injection:Delay:MaximumLatency")
                     ),
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()
@@ -166,7 +166,7 @@ public class DelayInjectionTests
                     Microsoft.Extensions.Logging.LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
-                        (v, t) => v.ToString().Contains("must be greater than or equal")
+                        (v, t) => v.ToString()!.Contains("must be greater than or equal")
                     ),
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()

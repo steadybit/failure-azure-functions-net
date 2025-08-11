@@ -54,7 +54,7 @@ public class ExceptionInjectionTests
                     LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
-                        (v, t) => v.ToString().Contains("Steadybit:Injection:Exception:Message")
+                        (v, t) => v.ToString()!.Contains("Steadybit:Injection:Exception:Message")
                     ),
                     It.IsAny<Exception>(),
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()
