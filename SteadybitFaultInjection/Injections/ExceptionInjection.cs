@@ -5,6 +5,17 @@ using SteadybitFaultInjection.Injections;
 
 namespace SteadybitFaultInjections.Injections;
 
+public class SteadybitException : Exception
+{
+    public SteadybitException() { }
+
+    public SteadybitException(string message)
+        : base(message) { }
+
+    public SteadybitException(string? message, Exception? innerException)
+        : base(message, innerException) { }
+}
+
 public class ExceptionInjection : ISteadybitInjection
 {
     private readonly ILogger<ExceptionInjection> _logger;
@@ -16,11 +27,6 @@ public class ExceptionInjection : ISteadybitInjection
 
     public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
     {
-        return Task.CompletedTask;
-    }
-
-    public Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
-    {
         if (options?.Exception?.Message == null)
         {
             _logger.LogWarning(
@@ -29,10 +35,15 @@ public class ExceptionInjection : ISteadybitInjection
             return Task.CompletedTask;
         }
 
-        _logger.LogWarning(
+        _logger.LogInformation(
             "Injecting exception with message: \"{Message}\".",
             options.Exception.Message
         );
-        throw new Exception(options.Exception.Message);
+        throw new SteadybitException(options.Exception.Message);
+    }
+
+    public Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
+    {
+        return Task.CompletedTask;
     }
 }

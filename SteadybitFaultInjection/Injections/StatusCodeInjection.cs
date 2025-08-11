@@ -1,18 +1,10 @@
 using System.Net;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using SteadybitFaultInjection;
-using SteadybitFaultInjection.Injections;
 
 namespace SteadybitFaultInjections.Injections;
-
-public class SteadybitException : Exception
-{
-    public SteadybitException(string message)
-        : base(message) { }
-}
 
 public class StatusCodeFailure : ISteadybitInjection
 {
@@ -20,21 +12,36 @@ public class StatusCodeFailure : ISteadybitInjection
 
     private readonly ILogger _logger;
 
+    public HttpRequestData? HttpRequestData
+    {
+        get => _httpRequestData;
+        private set => _httpRequestData = value;
+    }
+
     public StatusCodeFailure(ILogger<StatusCodeFailure> logger)
     {
         _logger = logger;
     }
 
+    public virtual async Task<HttpRequestData?> GetHttpRequestDataAsync(FunctionContext context)
+    {
+        return await context.GetHttpRequestDataAsync();
+    }
+
     public async Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
     {
-        var request = await context.GetHttpRequestDataAsync();
+        var request = await GetHttpRequestDataAsync(context);
+        HttpRequestData = request;
+    }
 
-        if (request == null)
+    public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
+    {
+        if (HttpRequestData == null)
         {
-            _logger.LogDebug(
+            _logger.LogWarning(
                 "HttpRequestData is not present, might not be using HTTP Trigger, skipping injection..."
             );
-            return;
+            return Task.CompletedTask;
         }
 
         if (options.StatusCodeValue == null)
@@ -42,16 +49,6 @@ public class StatusCodeFailure : ISteadybitInjection
             _logger.LogWarning(
                 "Key Steadybit:Injection:StatusCode is not provided or invalid, skipping injection..."
             );
-            return;
-        }
-
-        _httpRequestData = request;
-    }
-
-    public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
-    {
-        if (options.StatusCodeValue == null || _httpRequestData == null)
-        {
             return Task.CompletedTask;
         }
 
@@ -59,7 +56,7 @@ public class StatusCodeFailure : ISteadybitInjection
 
         if (response != null)
         {
-            var customResponse = _httpRequestData.CreateResponse(
+            var customResponse = HttpRequestData.CreateResponse(
                 (HttpStatusCode)options.StatusCodeValue
             );
             customResponse.Headers = response.Headers;
