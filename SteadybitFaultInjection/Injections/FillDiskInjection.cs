@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using SteadybitFaultInjection;
 using SteadybitFaultInjection.Injections;
 
-namespace SteadybitFaultInjections.Injections;
+namespace SteadybitFaultInjection.Injections;
 
 public class FillDiskInjection : ISteadybitInjection
 {
@@ -14,7 +14,7 @@ public class FillDiskInjection : ISteadybitInjection
         _logger = logger;
     }
 
-    public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
+    public Task ExecuteAfterAsync(ISteadybitContext _, SteadybitInjectionOptions options)
     {
         if (options?.FillDisk == null || options.FillDisk.MegabytesValue == null)
         {
@@ -42,7 +42,7 @@ public class FillDiskInjection : ISteadybitInjection
         return Task.CompletedTask;
     }
 
-    public Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
+    public Task ExecuteBeforeAsync(ISteadybitContext _, SteadybitInjectionOptions options)
     {
         return Task.CompletedTask;
     }

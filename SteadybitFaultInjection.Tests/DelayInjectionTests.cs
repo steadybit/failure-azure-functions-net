@@ -1,22 +1,20 @@
-using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using Microsoft.Identity.Client;
 using Moq;
-using SteadybitFaultInjections.Injections;
+using SteadybitFaultInjection.Injections;
 
 namespace SteadybitFaultInjection.Tests;
 
 public class DelayInjectionTests
 {
     private readonly Mock<ILogger<DelayInjection>> _logger;
-    private readonly Mock<FunctionContext> _context;
+    private readonly Mock<FunctionContext> _fnContext;
+    public readonly Mock<ISteadybitContext> _context;
 
     public DelayInjectionTests()
     {
         _logger = new Mock<ILogger<DelayInjection>>();
-        _context = new Mock<FunctionContext>();
+        _context = new Mock<ISteadybitContext>();
     }
 
     [Fact]

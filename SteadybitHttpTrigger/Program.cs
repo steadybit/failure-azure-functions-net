@@ -1,12 +1,9 @@
 using Azure.Identity;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.FeatureManagement;
 using Serilog;
 using SteadybitFaultInjection;
 
@@ -48,7 +45,7 @@ builder.Services.AddLogging(loggingBuilder =>
 
 builder.Services.AddSteadybitFailureServices();
 
-builder.UseMiddleware<SteadybitInjectionMiddleware>();
+builder.UseMiddleware<SteadybitAzureFunctionsMiddleware>();
 
 builder.Services.AddAzureAppConfiguration();
 

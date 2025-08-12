@@ -1,10 +1,11 @@
 using System.Net;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using SteadybitFaultInjection;
 
-namespace SteadybitFaultInjections.Injections;
+namespace SteadybitFaultInjection.Injections;
 
 public class StatusCodeFailure : ISteadybitInjection
 {
@@ -28,13 +29,24 @@ public class StatusCodeFailure : ISteadybitInjection
         return await context.GetHttpRequestDataAsync();
     }
 
-    public async Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
+    public async Task ExecuteBeforeAsync(
+        ISteadybitContext context,
+        SteadybitInjectionOptions options
+    )
     {
-        var request = await GetHttpRequestDataAsync(context);
-        HttpRequestData = request;
+        var ctx = context.Unwrap();
+        if (ctx is FunctionContext fnContext)
+        {
+            var request = await GetHttpRequestDataAsync(fnContext);
+            HttpRequestData = request;
+        }
+        else if (context is HttpContext)
+        {
+            throw new NotImplementedException("Not implemented.");
+        }
     }
 
-    public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
+    public Task ExecuteAfterAsync(ISteadybitContext context, SteadybitInjectionOptions options)
     {
         if (HttpRequestData == null)
         {
@@ -52,20 +64,30 @@ public class StatusCodeFailure : ISteadybitInjection
             return Task.CompletedTask;
         }
 
-        var response = context.GetHttpResponseData();
-
-        if (response != null)
+        var ctx = context.Unwrap();
+        if (ctx is FunctionContext fnContext)
         {
-            var customResponse = HttpRequestData.CreateResponse(
-                (HttpStatusCode)options.StatusCodeValue
-            );
-            customResponse.Headers = response.Headers;
-            customResponse.Body = response.Body;
+            var response = fnContext.GetHttpResponseData();
 
-            context.GetInvocationResult().Value = customResponse;
-            _logger.LogInformation(
-                $"Injected status code: {options.StatusCodeValue.GetType().Name} ({options.StatusCodeValue})"
-            );
+            if (response != null)
+            {
+                var customResponse = HttpRequestData.CreateResponse(
+                    (HttpStatusCode)options.StatusCodeValue
+                );
+                customResponse.Headers = response.Headers;
+                customResponse.Body = response.Body;
+
+                fnContext.GetInvocationResult().Value = customResponse;
+                _logger.LogInformation(
+                    $"Injected status code: {options.StatusCodeValue.GetType().Name} ({options.StatusCodeValue})"
+                );
+            }
+
+            return Task.CompletedTask;
+        }
+        else if (ctx is HttpContext httpContext)
+        {
+            throw new NotImplementedException("Not implemented.");
         }
 
         return Task.CompletedTask;
