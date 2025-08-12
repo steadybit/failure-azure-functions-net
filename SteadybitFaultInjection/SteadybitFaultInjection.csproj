@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <PackageId>Steadybit.AzureFunctions.FaultInjection</PackageId>
+    <PackageId>Steadybit.FaultInjection</PackageId>
     <Version>0.1.0</Version>
     <Company>Steadybit GmbH</Company>
     <PackageDescription>Steadybit Fault Injection for Azure Functions</PackageDescription>
