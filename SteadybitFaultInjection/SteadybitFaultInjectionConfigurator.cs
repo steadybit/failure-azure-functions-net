@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 using Microsoft.Extensions.DependencyInjection;
-using SteadybitFaultInjections.Injections;
+using SteadybitFaultInjection.Injections;
 
 namespace SteadybitFaultInjection;
 

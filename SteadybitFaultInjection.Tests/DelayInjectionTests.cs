@@ -1,22 +1,19 @@
-using System.Threading.Tasks;
-using Castle.Core.Logging;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using Microsoft.Identity.Client;
 using Moq;
-using SteadybitFaultInjections.Injections;
+using SteadybitFaultInjection.Injections;
 
 namespace SteadybitFaultInjection.Tests;
 
 public class DelayInjectionTests
 {
     private readonly Mock<ILogger<DelayInjection>> _logger;
-    private readonly Mock<FunctionContext> _context;
+    public readonly Mock<ISteadybitContext> _context;
 
     public DelayInjectionTests()
     {
         _logger = new Mock<ILogger<DelayInjection>>();
-        _context = new Mock<FunctionContext>();
+        _context = new Mock<ISteadybitContext>();
     }
 
     [Fact]
@@ -58,7 +55,7 @@ public class DelayInjectionTests
         _logger.Verify(
             x =>
                 x.Log(
-                    Microsoft.Extensions.Logging.LogLevel.Warning,
+                    LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
                         (v, t) => v.ToString()!.Contains("Delay options are not provided")
@@ -93,7 +90,7 @@ public class DelayInjectionTests
         _logger.Verify(
             x =>
                 x.Log(
-                    Microsoft.Extensions.Logging.LogLevel.Warning,
+                    LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
                         (v, t) => v.ToString()!.Contains("Steadybit:Injection:Delay:MinimumLatency")
@@ -128,7 +125,7 @@ public class DelayInjectionTests
         _logger.Verify(
             x =>
                 x.Log(
-                    Microsoft.Extensions.Logging.LogLevel.Warning,
+                    LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
                         (v, t) => v.ToString()!.Contains("Steadybit:Injection:Delay:MaximumLatency")
@@ -163,7 +160,7 @@ public class DelayInjectionTests
         _logger.Verify(
             x =>
                 x.Log(
-                    Microsoft.Extensions.Logging.LogLevel.Warning,
+                    LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
                         (v, t) => v.ToString()!.Contains("must be greater than or equal")

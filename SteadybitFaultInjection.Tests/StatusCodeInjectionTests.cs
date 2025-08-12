@@ -1,10 +1,9 @@
-using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SteadybitFaultInjection;
-using Xunit;
+using SteadybitFaultInjection.Injections;
 
 namespace SteadybitFaultInjections.Injections.Tests
 {
@@ -31,7 +30,10 @@ namespace SteadybitFaultInjections.Injections.Tests
                 .Setup(x => x.GetHttpRequestDataAsync(_contextMock.Object))
                 .ReturnsAsync(_requestMock.Object);
 
-            await injection.Object.ExecuteBeforeAsync(_contextMock.Object, options);
+            await injection.Object.ExecuteBeforeAsync(
+                new SteadybitFunctionContext(_contextMock.Object),
+                options
+            );
 
             Assert.NotNull(injection.Object.HttpRequestData);
         }
@@ -42,7 +44,10 @@ namespace SteadybitFaultInjections.Injections.Tests
             var injection = new StatusCodeFailure(_loggerMock.Object);
             var options = new SteadybitInjectionOptions { StatusCode = "404" };
 
-            await injection.ExecuteAfterAsync(_contextMock.Object, options);
+            await injection.ExecuteAfterAsync(
+                new SteadybitFunctionContext(_contextMock.Object),
+                options
+            );
 
             _loggerMock.Verify(
                 x =>
@@ -69,8 +74,14 @@ namespace SteadybitFaultInjections.Injections.Tests
                 .Setup(x => x.GetHttpRequestDataAsync(_contextMock.Object))
                 .ReturnsAsync(_requestMock.Object);
 
-            await injection.Object.ExecuteBeforeAsync(_contextMock.Object, options);
-            await injection.Object.ExecuteAfterAsync(_contextMock.Object, options);
+            await injection.Object.ExecuteBeforeAsync(
+                new SteadybitFunctionContext(_contextMock.Object),
+                options
+            );
+            await injection.Object.ExecuteAfterAsync(
+                new SteadybitFunctionContext(_contextMock.Object),
+                options
+            );
 
             _loggerMock.Verify(
                 x =>

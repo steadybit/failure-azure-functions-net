@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using SteadybitFaultInjection;
 using SteadybitFaultInjection.Injections;
 
-namespace SteadybitFaultInjections.Injections;
+namespace SteadybitFaultInjection.Injections;
 
 public class SteadybitException : Exception
 {
@@ -25,7 +25,7 @@ public class ExceptionInjection : ISteadybitInjection
         _logger = logger;
     }
 
-    public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
+    public Task ExecuteAfterAsync(ISteadybitContext _, SteadybitInjectionOptions options)
     {
         if (options?.Exception?.Message == null)
         {
@@ -39,10 +39,11 @@ public class ExceptionInjection : ISteadybitInjection
             "Injecting exception with message: \"{Message}\".",
             options.Exception.Message
         );
+
         throw new SteadybitException(options.Exception.Message);
     }
 
-    public Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
+    public Task ExecuteBeforeAsync(ISteadybitContext _, SteadybitInjectionOptions options)
     {
         return Task.CompletedTask;
     }

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using SteadybitFaultInjection;
 using SteadybitFaultInjection.Injections;
 
-namespace SteadybitFaultInjections.Injections;
+namespace SteadybitFaultInjection.Injections;
 
 public class DelayInjection : ISteadybitInjection
 {
@@ -14,12 +14,15 @@ public class DelayInjection : ISteadybitInjection
         _logger = logger;
     }
 
-    public Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options)
+    public Task ExecuteAfterAsync(ISteadybitContext context, SteadybitInjectionOptions options)
     {
         return Task.CompletedTask;
     }
 
-    public async Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options)
+    public async Task ExecuteBeforeAsync(
+        ISteadybitContext context,
+        SteadybitInjectionOptions options
+    )
     {
         if (options?.Delay == null)
         {

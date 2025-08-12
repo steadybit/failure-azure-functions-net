@@ -1,19 +1,19 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SteadybitFaultInjections.Injections;
+using SteadybitFaultInjection.Injections;
 
 namespace SteadybitFaultInjection.Tests;
 
 public class ExceptionInjectionTests
 {
     private readonly Mock<ILogger<ExceptionInjection>> _logger;
-    private readonly Mock<FunctionContext> _context;
+    public readonly Mock<ISteadybitContext> _context;
 
     public ExceptionInjectionTests()
     {
         _logger = new Mock<ILogger<ExceptionInjection>>();
-        _context = new Mock<FunctionContext>();
+        _context = new Mock<ISteadybitContext>();
     }
 
     [Fact]

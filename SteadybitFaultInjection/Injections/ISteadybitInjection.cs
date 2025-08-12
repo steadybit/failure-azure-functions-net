@@ -2,12 +2,12 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using SteadybitFaultInjection;
 
-namespace SteadybitFaultInjections.Injections;
+namespace SteadybitFaultInjection.Injections;
 
 public interface ISteadybitInjection
 {
-    Task ExecuteBeforeAsync(FunctionContext context, SteadybitInjectionOptions options);
-    Task ExecuteAfterAsync(FunctionContext context, SteadybitInjectionOptions options);
+    Task ExecuteBeforeAsync(ISteadybitContext context, SteadybitInjectionOptions options);
+    Task ExecuteAfterAsync(ISteadybitContext context, SteadybitInjectionOptions options);
 }
 
 public interface ISteadybitInjectionWithTermination : ISteadybitInjection
