@@ -8,7 +8,6 @@ namespace SteadybitFaultInjection.Tests;
 public class DelayInjectionTests
 {
     private readonly Mock<ILogger<DelayInjection>> _logger;
-    private readonly Mock<FunctionContext> _fnContext;
     public readonly Mock<ISteadybitContext> _context;
 
     public DelayInjectionTests()
@@ -56,7 +55,7 @@ public class DelayInjectionTests
         _logger.Verify(
             x =>
                 x.Log(
-                    Microsoft.Extensions.Logging.LogLevel.Warning,
+                    LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
                         (v, t) => v.ToString()!.Contains("Delay options are not provided")
@@ -91,7 +90,7 @@ public class DelayInjectionTests
         _logger.Verify(
             x =>
                 x.Log(
-                    Microsoft.Extensions.Logging.LogLevel.Warning,
+                    LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
                         (v, t) => v.ToString()!.Contains("Steadybit:Injection:Delay:MinimumLatency")
@@ -126,7 +125,7 @@ public class DelayInjectionTests
         _logger.Verify(
             x =>
                 x.Log(
-                    Microsoft.Extensions.Logging.LogLevel.Warning,
+                    LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
                         (v, t) => v.ToString()!.Contains("Steadybit:Injection:Delay:MaximumLatency")
@@ -161,7 +160,7 @@ public class DelayInjectionTests
         _logger.Verify(
             x =>
                 x.Log(
-                    Microsoft.Extensions.Logging.LogLevel.Warning,
+                    LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>(
                         (v, t) => v.ToString()!.Contains("must be greater than or equal")
