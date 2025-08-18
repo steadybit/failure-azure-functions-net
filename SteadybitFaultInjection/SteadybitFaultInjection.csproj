@@ -4,7 +4,7 @@
     <PackageId>Steadybit.FaultInjection</PackageId>
     <Version>0.1.0</Version>
     <Company>Steadybit GmbH</Company>
-    <PackageDescription>Steadybit Fault Injection for Azure Functions</PackageDescription>
+    <PackageDescription>Steadybit Fault Injection Middleware</PackageDescription>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
