@@ -10,32 +10,29 @@ public class SteadybitMiddleware
     private readonly RequestDelegate _next;
     private readonly IConfiguration _configuration;
     private readonly ILogger _logger;
-    private readonly IEnumerable<ISteadybitInjection> _injections;
 
     public SteadybitMiddleware(
         RequestDelegate next,
         IConfiguration configuration,
-        ILogger<SteadybitAzureFunctionsMiddleware> logger,
-        IEnumerable<ISteadybitInjection> injections
+        ILogger<SteadybitAzureFunctionsMiddleware> logger
     )
     {
         _next = next;
         _configuration = configuration;
         _logger = logger;
-        _injections = injections;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, IEnumerable<ISteadybitInjection> injections)
     {
         var options = _configuration.GetSteadybitFailureOptions();
 
-        if (options.IsValid(_logger))
+        if (!options.IsValid(_logger))
         {
             await _next(context);
             return;
         }
 
-        var injection = options.ResolveInjection(_injections);
+        var injection = options.ResolveInjection(injections);
 
         if (injection == null)
         {

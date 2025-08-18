@@ -22,19 +22,17 @@ builder.Configuration.AddAzureAppConfiguration(options =>
 
 builder.Services.AddApplicationInsightsTelemetry();
 
-builder.Services.AddLogging(loggingBuilder =>
-{
-    var serviceProvider = builder.Services.BuildServiceProvider();
-    var telemetryConfiguration =
-        serviceProvider.GetRequiredService<Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration>();
-    var logger = new LoggerConfiguration()
-        .MinimumLevel.Debug()
-        .WriteTo.Console()
-        .WriteTo.ApplicationInsights(telemetryConfiguration, TelemetryConverter.Traces)
-        .CreateLogger();
-
-    loggingBuilder.AddSerilog(logger, dispose: true);
-});
+builder.Services.AddSerilog(
+    (services, lc) =>
+    {
+        lc.MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo.ApplicationInsights(
+                services.GetService<Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration>(),
+                TelemetryConverter.Traces
+            );
+    }
+);
 
 builder.Services.AddSteadybitFailureServices();
 

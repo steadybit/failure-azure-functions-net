@@ -10,6 +10,8 @@ namespace SteadybitFaultInjection.Injections;
 public class StatusCodeFailure : ISteadybitInjection
 {
     private HttpRequestData? _httpRequestData;
+    private Stream? _requestStream;
+    private Stream? _responseStream;
 
     private readonly ILogger _logger;
 
@@ -17,6 +19,18 @@ public class StatusCodeFailure : ISteadybitInjection
     {
         get => _httpRequestData;
         private set => _httpRequestData = value;
+    }
+
+    public Stream? RequestStream
+    {
+        get => _requestStream;
+        private set => _requestStream = value;
+    }
+
+    public Stream? ResponseStream
+    {
+        get => _requestStream;
+        private set => _requestStream = value;
     }
 
     public StatusCodeFailure(ILogger<StatusCodeFailure> logger)
@@ -40,33 +54,42 @@ public class StatusCodeFailure : ISteadybitInjection
             var request = await GetHttpRequestDataAsync(fnContext);
             HttpRequestData = request;
         }
-        else if (context is HttpContext)
+        else if (ctx is HttpContext httpContext)
         {
-            throw new NotImplementedException("Not implemented.");
+            _requestStream = httpContext.Response.Body;
+            _responseStream = new MemoryStream();
+            httpContext.Response.Body = _responseStream;
+        }
+        else
+        {
+            throw new NotImplementedException();
         }
     }
 
-    public Task ExecuteAfterAsync(ISteadybitContext context, SteadybitInjectionOptions options)
+    public async Task ExecuteAfterAsync(
+        ISteadybitContext context,
+        SteadybitInjectionOptions options
+    )
     {
-        if (HttpRequestData == null)
-        {
-            _logger.LogWarning(
-                "HttpRequestData is not present, might not be using HTTP Trigger, skipping injection..."
-            );
-            return Task.CompletedTask;
-        }
-
         if (options.StatusCodeValue == null)
         {
             _logger.LogWarning(
                 "Key Steadybit:Injection:StatusCode is not provided or invalid, skipping injection..."
             );
-            return Task.CompletedTask;
+            return;
         }
 
         var ctx = context.Unwrap();
+
         if (ctx is FunctionContext fnContext)
         {
+            if (HttpRequestData == null)
+            {
+                _logger.LogWarning(
+                    "HttpRequestData is not present, might not be using HTTP Trigger, skipping injection..."
+                );
+                return;
+            }
             var response = fnContext.GetHttpResponseData();
 
             if (response != null)
@@ -83,13 +106,32 @@ public class StatusCodeFailure : ISteadybitInjection
                 );
             }
 
-            return Task.CompletedTask;
+            return;
         }
         else if (ctx is HttpContext httpContext)
         {
-            throw new NotImplementedException("Not implemented.");
+            if (_requestStream == null)
+            {
+                _logger.LogError("Request stream is null, skipping injection...");
+                return;
+            }
+
+            if (_responseStream == null)
+            {
+                _logger.LogError("Response stream is null, skipping injection...");
+                return;
+            }
+
+            httpContext.Response.StatusCode = (int)options.StatusCodeValue;
+            _responseStream.Seek(0, SeekOrigin.Begin);
+            await _responseStream.CopyToAsync(_requestStream);
+            httpContext.Response.Body = _responseStream;
+        }
+        else
+        {
+            throw new NotImplementedException();
         }
 
-        return Task.CompletedTask;
+        return;
     }
 }
