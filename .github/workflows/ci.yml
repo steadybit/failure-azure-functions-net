@@ -44,7 +44,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --org=${{ vars.SNYK_ORG_ID }} --severity-threshold=high --project-name=${{ github.repository }} --target-reference=${{ github.ref_name }} --file=failure-azure-functions-net.sln
+          args: --org=${{ vars.SNYK_ORG_ID }} --severity-threshold=high --all-projects --target-reference=${{ github.ref_name }}
           command: test
 
       - name: SonarCloud scan
