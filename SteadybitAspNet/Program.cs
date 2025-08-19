@@ -42,8 +42,8 @@ var app = builder.Build();
 
 app.UseAzureAppConfiguration();
 
-app.MapGet("/", () => "Hello World!");
-
 app.UseMiddleware<SteadybitMiddleware>();
+
+app.MapGet("/", () => "Hello World!");
 
 app.Run();
