@@ -80,7 +80,7 @@ jobs:
       - run: dotnet build --configuration Release
 
       - name: "[release] Publish"
-        working-directory: ./SteadybitFaultInjection/bin/Release/net8.0/
+        working-directory: ./SteadybitFaultInjection/bin/Release/
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         run: dotnet nuget push *.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
         env:
