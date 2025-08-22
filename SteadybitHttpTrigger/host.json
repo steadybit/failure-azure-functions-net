@@ -8,5 +8,8 @@
             },
             "enableLiveMetricsFilters": true
         }
+    },
+    "concurrency": {
+      "dynamicConcurrencyEnabled": false
     }
 }

@@ -27,7 +27,7 @@ public class SteadybitAzureFunctionsMiddleware : IFunctionsWorkerMiddleware
     {
         var options = _configuration.GetSteadybitFailureOptions();
 
-        if (options.IsValid(_logger))
+        if (!options.IsValid(_logger))
         {
             await next(context);
             return;

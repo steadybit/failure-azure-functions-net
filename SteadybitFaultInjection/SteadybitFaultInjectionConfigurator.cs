@@ -11,16 +11,7 @@ public static class SteadybitFaultInjectionConfigurator
     public static void ConfigureSteadybitFaultInjection(this AzureAppConfigurationOptions options)
     {
         options
-            .Select($"{SteadybitFaultInjectionsPrefix}:Enabled", LabelFilter.Null)
-            .Select($"{SteadybitFaultInjectionsPrefix}:Rate", LabelFilter.Null)
-            .Select($"{SteadybitFaultInjectionsPrefix}:Injection", LabelFilter.Null)
-            .Select($"{SteadybitFaultInjectionsPrefix}:Revision", LabelFilter.Null)
-            .Select($"{SteadybitFaultInjectionsPrefix}:StatusCode", LabelFilter.Null)
-            .Select($"{SteadybitFaultInjectionsPrefix}:Delay:MinimumLatency", LabelFilter.Null)
-            .Select($"{SteadybitFaultInjectionsPrefix}:Delay:MaximumLatency", LabelFilter.Null)
-            .Select($"{SteadybitFaultInjectionsPrefix}:Exception:Message", LabelFilter.Null)
-            .Select($"{SteadybitFaultInjectionsPrefix}:FillDisk:Megabytes", LabelFilter.Null)
-            .Select($"{SteadybitFaultInjectionsPrefix}:Block:Hosts", LabelFilter.Null)
+            .Select($"{SteadybitFaultInjectionsPrefix}:*", LabelFilter.Null)
             .ConfigureRefresh(refresh =>
             {
                 refresh

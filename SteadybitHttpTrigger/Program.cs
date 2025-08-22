@@ -43,12 +43,12 @@ builder.Services.AddLogging(loggingBuilder =>
     loggingBuilder.AddSerilog(logger, dispose: true);
 });
 
-builder.Services.AddSteadybitFailureServices();
-
-builder.UseMiddleware<SteadybitAzureFunctionsMiddleware>();
-
 builder.Services.AddAzureAppConfiguration();
 
+builder.Services.AddSteadybitFailureServices();
+
 builder.UseAzureAppConfiguration();
+
+builder.UseMiddleware<SteadybitAzureFunctionsMiddleware>();
 
 builder.Build().Run();
