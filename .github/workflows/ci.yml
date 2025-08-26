@@ -101,12 +101,12 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       
-      - name: Azure CLI script
+      - name: Login to ACR 
         uses: azure/cli@v2
         with:
           azcliversion: latest
           inlineScript: |
-            az acr login ${{ vars.ACR_NAME }} 
+            az acr login -n ${{ vars.ACR_NAME }} 
 
       - name: Build & Push ASP Middleware Image
         uses: azure/cli@v2
