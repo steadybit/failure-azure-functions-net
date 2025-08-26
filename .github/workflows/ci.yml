@@ -97,16 +97,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: azure/login@v2
+      - name: Login to Azure ACR
+        uses: docker/login-action@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          registry: ${{ vars.ACR_NAME }}.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Docker build
+        run: |
+          docker build -t ${{ vars.ACR_NAME }}.azurecr.io/aspnetmiddleware:latest .
+
+      - name: Docker tag
+        run: |
+          docker tag ${{ vars.ACR_NAME }}.azurecr.io/aspnetmiddleware:latest ${{ vars.ACR_NAME }}.azurecr.io/aspnetmiddleware:${{ github.sha }}
       
-      - name: Build & Push ASP Middleware Image
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az acr build -t aspnetmiddleware:latest -t  aspnetmiddleware:${{ github.sha }} --registry ${{ vars.ACR_NAME }} --file Dockerfile .
+      - name: Push ASP Middleware Image
+        run: |
+          docker push ${{ vars.ACR_NAME }}.azurecr.io/aspnetmiddleware:latest
+          docker push ${{ vars.ACR_NAME }}.azurecr.io/aspnetmiddleware:${{ github.sha }}
+
 
 
 
