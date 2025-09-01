@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -8,12 +9,15 @@ namespace SteadybitFaultInjection.Tests;
 public class ExceptionInjectionTests
 {
     private readonly Mock<ILogger<ExceptionInjection>> _logger;
-    public readonly Mock<ISteadybitContext> _context;
+    public readonly Mock<SteadybitHttpContext> _context;
+
+    public readonly Mock<HttpContext> _fnContext;
 
     public ExceptionInjectionTests()
     {
         _logger = new Mock<ILogger<ExceptionInjection>>();
-        _context = new Mock<ISteadybitContext>();
+        _fnContext = new Mock<HttpContext>();
+        _context = new Mock<SteadybitHttpContext>(_fnContext.Object);
     }
 
     [Fact]
@@ -28,11 +32,9 @@ public class ExceptionInjectionTests
             },
         };
 
-        await exceptionInjection.ExecuteBeforeAsync(_context.Object, options);
-
         await Assert.ThrowsAsync<SteadybitException>(async () =>
         {
-            await exceptionInjection.ExecuteAfterAsync(_context.Object, options);
+            await exceptionInjection.ExecuteBeforeAsync(_context.Object, options);
         });
     }
 
