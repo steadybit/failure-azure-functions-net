@@ -118,8 +118,3 @@ jobs:
         run: |
           docker push ${{ vars.ACR_NAME }}.azurecr.io/aspnetmiddleware:latest
           docker push ${{ vars.ACR_NAME }}.azurecr.io/aspnetmiddleware:${{ github.sha }}
-
-
-
-
-

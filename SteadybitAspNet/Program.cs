@@ -45,7 +45,29 @@ var app = builder.Build();
 
 app.UseAzureAppConfiguration();
 
+// app.Use(async (context, next) =>
+// {
+//     try
+//     {
+//         await next();
+//     }
+//     catch
+//     {
+//         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+//         context.Response.ContentType = "application/json";
+        
+//         var errorResponse = new
+//         {
+//             Error = "Internal Server Error",
+//             Message = "An error occurred in the middleware pipeline"
+//         };
+        
+//         await context.Response.WriteAsync(JsonSerializer.Serialize(errorResponse));
+//     }
+// });
+
 app.UseMiddleware<SteadybitMiddleware>();
+
 
 app.MapGet("/", () => "Hello World!");
 
