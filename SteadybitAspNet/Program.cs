@@ -50,25 +50,25 @@ app.UseMiddleware<SteadybitMiddleware>();
 
 app.MapGet("/", () => "Hello World!");
 
-app.MapGet("/Env", async (HttpContext context) =>
-{
-  if (!context.Request.Query.TryGetValue("key", out StringValues key))
-  {
-    return Results.BadRequest($"Key '${key}' is not found.");
-  }
+app.MapGet(
+    "/Env",
+    async (HttpContext context) =>
+    {
+        if (!context.Request.Query.TryGetValue("key", out StringValues key))
+        {
+            return Results.BadRequest($"Key '${key}' is not found.");
+        }
 
-  var env = Environment.GetEnvironmentVariable(key.ToString());
+        var env = Environment.GetEnvironmentVariable(key.ToString());
 
-  if (env == null) {
-    return Results.BadRequest($"Key '${key}' is not found.");
-  }
+        if (env == null)
+        {
+            return Results.BadRequest($"Key '${key}' is not found.");
+        }
 
-  return Results.Ok(new
-  {
-    key = "key",
-    value = env
-  });
-});
+        return Results.Ok(new { key = "key", value = env });
+    }
+);
 
 app.MapGet(
     "/HttpTrigger",
