@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
 using Azure.Identity;
+using Microsoft.Extensions.Primitives;
 using Serilog;
 using SteadybitFaultInjection;
 
@@ -45,30 +46,29 @@ var app = builder.Build();
 
 app.UseAzureAppConfiguration();
 
-// app.Use(async (context, next) =>
-// {
-//     try
-//     {
-//         await next();
-//     }
-//     catch
-//     {
-//         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-//         context.Response.ContentType = "application/json";
-
-//         var errorResponse = new
-//         {
-//             Error = "Internal Server Error",
-//             Message = "An error occurred in the middleware pipeline"
-//         };
-
-//         await context.Response.WriteAsync(JsonSerializer.Serialize(errorResponse));
-//     }
-// });
-
 app.UseMiddleware<SteadybitMiddleware>();
 
 app.MapGet("/", () => "Hello World!");
+
+app.MapGet("/Env", async (HttpContext context) =>
+{
+  if (!context.Request.Query.TryGetValue("key", out StringValues key))
+  {
+    return Results.BadRequest($"Key '${key}' is not found.");
+  }
+
+  var env = Environment.GetEnvironmentVariable(key.ToString());
+
+  if (env == null) {
+    return Results.BadRequest($"Key '${key}' is not found.");
+  }
+
+  return Results.Ok(new
+  {
+    key = "key",
+    value = env
+  });
+});
 
 app.MapGet(
     "/HttpTrigger",
