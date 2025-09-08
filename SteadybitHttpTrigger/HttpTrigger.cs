@@ -1,26 +1,18 @@
-using System.Net;
-using System.Net.Sockets;
-using System.Text.Json;
-using Grpc.Core;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SteadybitFaultInjection;
+using System.Net;
+using System.Net.Sockets;
+using System.Text.Json;
 
 namespace Steadybit.HttpTrigger;
 
-public class HttpTrigger
+public class HttpTrigger(ILogger<HttpTrigger> logger, IConfiguration configuration)
 {
-    private readonly ILogger<HttpTrigger> _logger;
-    private readonly IConfiguration _configuration;
-
-    public HttpTrigger(ILogger<HttpTrigger> logger, IConfiguration configuration)
-    {
-        _logger = logger;
-        _configuration = configuration;
-    }
+    private readonly ILogger<HttpTrigger> _logger = logger;
+    private readonly IConfiguration _configuration = configuration;
 
     [Function("HttpTrigger")]
     public async Task<HttpResponseData> Run(

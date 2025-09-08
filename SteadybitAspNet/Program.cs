@@ -1,10 +1,9 @@
-using System.Net;
-using System.Net.Sockets;
-using System.Text.Json;
 using Azure.Identity;
 using Microsoft.Extensions.Primitives;
 using Serilog;
 using SteadybitFaultInjection;
+using System.Net;
+using System.Net.Sockets;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,7 +51,7 @@ app.MapGet("/", () => "Hello World!");
 
 app.MapGet(
     "/Env",
-    async (HttpContext context) =>
+    (HttpContext context) =>
     {
         if (!context.Request.Query.TryGetValue("key", out StringValues key))
         {

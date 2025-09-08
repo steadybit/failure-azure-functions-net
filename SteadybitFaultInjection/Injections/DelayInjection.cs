@@ -1,18 +1,10 @@
-using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using SteadybitFaultInjection;
-using SteadybitFaultInjection.Injections;
 
 namespace SteadybitFaultInjection.Injections;
 
-public class DelayInjection : ISteadybitInjection
+public class DelayInjection(ILogger<DelayInjection> logger) : ISteadybitInjection
 {
-    private readonly ILogger<DelayInjection> _logger;
-
-    public DelayInjection(ILogger<DelayInjection> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<DelayInjection> _logger = logger;
 
     public Task ExecuteAfterAsync(ISteadybitContext context, SteadybitInjectionOptions options)
     {
@@ -62,7 +54,8 @@ public class DelayInjection : ISteadybitInjection
             (double)options.Delay.MinimumLatencyValue + (delayRange * new Random().NextDouble());
 
         _logger.LogInformation(
-            $"Injecting delay of {delay} milliseconds. Range: {minimumLatency} - {maximumLatency} milliseconds."
+            "Injecting delay of {Delay} milliseconds. Range: {MinimumLatency} - {MaximumLatency} milliseconds.",
+            delay, minimumLatency, maximumLatency
         );
         await Task.Delay(TimeSpan.FromMilliseconds(delay));
     }

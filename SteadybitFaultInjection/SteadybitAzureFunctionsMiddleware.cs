@@ -6,22 +6,14 @@ using SteadybitFaultInjection.Injections;
 
 namespace SteadybitFaultInjection;
 
-public class SteadybitAzureFunctionsMiddleware : IFunctionsWorkerMiddleware
+public class SteadybitAzureFunctionsMiddleware(
+    IConfiguration configuration,
+    ILogger<SteadybitAzureFunctionsMiddleware> logger,
+    IEnumerable<ISteadybitInjection> injections) : IFunctionsWorkerMiddleware
 {
-    private readonly IConfiguration _configuration;
-    private readonly ILogger _logger;
-    private readonly IEnumerable<ISteadybitInjection> _injections;
-
-    public SteadybitAzureFunctionsMiddleware(
-        IConfiguration configuration,
-        ILogger<SteadybitAzureFunctionsMiddleware> logger,
-        IEnumerable<ISteadybitInjection> injections
-    )
-    {
-        _configuration = configuration;
-        _logger = logger;
-        _injections = injections;
-    }
+    private readonly IConfiguration _configuration = configuration;
+    private readonly ILogger _logger = logger;
+    private readonly IEnumerable<ISteadybitInjection> _injections = injections;
 
     public async Task Invoke(FunctionContext context, FunctionExecutionDelegate next)
     {

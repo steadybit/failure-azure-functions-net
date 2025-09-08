@@ -1,19 +1,18 @@
-using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using SteadybitFaultInjection;
+using System.Net;
 
 namespace SteadybitFaultInjection.Injections;
 
-public class StatusCodeFailure : ISteadybitInjection
+public class StatusCodeFailure(ILogger<StatusCodeFailure> logger) : ISteadybitInjection
 {
+    private readonly ILogger _logger = logger;
+
     private HttpRequestData? _httpRequestData;
     private Stream? _requestStream;
     private Stream? _responseStream;
-
-    private readonly ILogger _logger;
 
     public HttpRequestData? HttpRequestData
     {
@@ -33,11 +32,6 @@ public class StatusCodeFailure : ISteadybitInjection
         private set => _requestStream = value;
     }
 
-    public StatusCodeFailure(ILogger<StatusCodeFailure> logger)
-    {
-        _logger = logger;
-    }
-
     public virtual async Task<HttpRequestData?> GetHttpRequestDataAsync(FunctionContext context)
     {
         return await context.GetHttpRequestDataAsync();
@@ -48,7 +42,7 @@ public class StatusCodeFailure : ISteadybitInjection
         SteadybitInjectionOptions options
     )
     {
-        var ctx = context.Unwrap();
+        var ctx = context.Unwrap;
         if (ctx is FunctionContext fnContext)
         {
             var request = await GetHttpRequestDataAsync(fnContext);
@@ -79,7 +73,7 @@ public class StatusCodeFailure : ISteadybitInjection
             return;
         }
 
-        var ctx = context.Unwrap();
+        var ctx = context.Unwrap;
 
         if (ctx is FunctionContext fnContext)
         {
@@ -102,7 +96,8 @@ public class StatusCodeFailure : ISteadybitInjection
 
                 fnContext.GetInvocationResult().Value = customResponse;
                 _logger.LogInformation(
-                    $"Injected status code: {options.StatusCodeValue.GetType().Name} ({options.StatusCodeValue})"
+                    "Injected status code: {StatusCodeType} ({StatusCodeValue})",
+                    options.StatusCodeValue.GetType().Name, options.StatusCodeValue
                 );
             }
 

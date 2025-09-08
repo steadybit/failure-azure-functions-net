@@ -1,18 +1,10 @@
-using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using SteadybitFaultInjection;
-using SteadybitFaultInjection.Injections;
 
 namespace SteadybitFaultInjection.Injections;
 
-public class FillDiskInjection : ISteadybitInjection
+public class FillDiskInjection(ILogger<FillDiskInjection> logger) : ISteadybitInjection
 {
-    private readonly ILogger<FillDiskInjection> _logger;
-
-    public FillDiskInjection(ILogger<FillDiskInjection> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<FillDiskInjection> _logger = logger;
 
     public Task ExecuteAfterAsync(ISteadybitContext _, SteadybitInjectionOptions options)
     {
@@ -36,7 +28,8 @@ public class FillDiskInjection : ISteadybitInjection
         }
 
         _logger.LogInformation(
-            $"Injected disk fill of {options.FillDisk.MegabytesValue} MB at {tempFilePath}."
+            "Injected disk fill of {Megabytes} MB at {TempFilePath}.",
+            options.FillDisk.MegabytesValue, tempFilePath
         );
 
         return Task.CompletedTask;
