@@ -13,7 +13,7 @@ public class InjectionHelper
 
     public static bool ShouldExecuteBasedOnRate(int rate, out int randomValue)
     {
-        Random random = new Random();
+        Random random = new();
         randomValue = random.Next(1, 101);
 
         return randomValue <= rate;

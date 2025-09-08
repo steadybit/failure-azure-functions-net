@@ -5,22 +5,15 @@ using SteadybitFaultInjection.Injections;
 
 namespace SteadybitFaultInjection;
 
-public class SteadybitMiddleware
-{
-    private readonly RequestDelegate _next;
-    private readonly IConfiguration _configuration;
-    private readonly ILogger _logger;
-
-    public SteadybitMiddleware(
-        RequestDelegate next,
-        IConfiguration configuration,
-        ILogger<SteadybitAzureFunctionsMiddleware> logger
+public class SteadybitMiddleware(
+    RequestDelegate next,
+    IConfiguration configuration,
+    ILogger<SteadybitAzureFunctionsMiddleware> logger
     )
-    {
-        _next = next;
-        _configuration = configuration;
-        _logger = logger;
-    }
+{
+    private readonly RequestDelegate _next = next;
+    private readonly IConfiguration _configuration = configuration;
+    private readonly ILogger _logger = logger;
 
     public async Task InvokeAsync(HttpContext context, IEnumerable<ISteadybitInjection> injections)
     {

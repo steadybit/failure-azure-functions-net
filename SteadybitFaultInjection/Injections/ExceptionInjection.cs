@@ -15,18 +15,13 @@ public class SteadybitException : Exception
         : base(message, innerException) { }
 }
 
-public class ExceptionInjection : ISteadybitInjection
+public class ExceptionInjection(ILogger<ExceptionInjection> logger) : ISteadybitInjection
 {
-    private readonly ILogger<ExceptionInjection> _logger;
-
-    public ExceptionInjection(ILogger<ExceptionInjection> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<ExceptionInjection> _logger = logger;
 
     public Task ExecuteAfterAsync(ISteadybitContext context, SteadybitInjectionOptions options)
     {
-        var ctx = context.Unwrap();
+        var ctx = context.Unwrap;
 
         if (ctx is FunctionContext)
         {
@@ -50,7 +45,7 @@ public class ExceptionInjection : ISteadybitInjection
 
     public Task ExecuteBeforeAsync(ISteadybitContext context, SteadybitInjectionOptions options)
     {
-        var ctx = context.Unwrap();
+        var ctx = context.Unwrap;
 
         if (ctx is HttpContext)
         {

@@ -1,40 +1,23 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Identity.Client;
 
 namespace SteadybitFaultInjection;
 
 public interface ISteadybitContext
 {
-    public object Unwrap();
+    public object Unwrap { get; }
 }
 
-public class SteadybitHttpContext : ISteadybitContext
+public class SteadybitHttpContext(HttpContext context) : ISteadybitContext
 {
-    public HttpContext _context { get; set; }
+    public HttpContext Context { get; set; } = context;
 
-    public SteadybitHttpContext(HttpContext context)
-    {
-        _context = context;
-    }
-
-    public object Unwrap()
-    {
-        return _context;
-    }
+    public object Unwrap => Context;
 }
 
-public class SteadybitFunctionContext : ISteadybitContext
+public class SteadybitFunctionContext(FunctionContext context) : ISteadybitContext
 {
-    public FunctionContext _context { get; set; }
+    public FunctionContext Context { get; set; } = context;
 
-    public SteadybitFunctionContext(FunctionContext context)
-    {
-        _context = context;
-    }
-
-    public object Unwrap()
-    {
-        return _context;
-    }
+    public object Unwrap => Context;
 }

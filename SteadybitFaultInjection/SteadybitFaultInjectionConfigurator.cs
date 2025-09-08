@@ -6,7 +6,7 @@ namespace SteadybitFaultInjection;
 
 public static class SteadybitFaultInjectionConfigurator
 {
-    public static string SteadybitFaultInjectionsPrefix = "Steadybit:FaultInjection";
+    public static readonly string SteadybitFaultInjectionsPrefix = "Steadybit:FaultInjection";
 
     public static AzureAppConfigurationOptions ConfigureSteadybitFaultInjection(
         this AzureAppConfigurationOptions options
