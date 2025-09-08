@@ -8,9 +8,11 @@ public static class SteadybitFaultInjectionConfigurator
 {
     public static string SteadybitFaultInjectionsPrefix = "Steadybit:FaultInjection";
 
-    public static void ConfigureSteadybitFaultInjection(this AzureAppConfigurationOptions options)
+    public static AzureAppConfigurationOptions ConfigureSteadybitFaultInjection(
+        this AzureAppConfigurationOptions options
+    )
     {
-        options
+        return options
             .Select($"{SteadybitFaultInjectionsPrefix}:*", LabelFilter.Null)
             .ConfigureRefresh(refresh =>
             {

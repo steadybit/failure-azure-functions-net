@@ -66,7 +66,7 @@ app.MapGet(
             return Results.BadRequest($"Key '${key}' is not found.");
         }
 
-        return Results.Ok(new { key = "key", value = env });
+        return Results.Ok(new { key = key.ToString(), value = env });
     }
 );
 
