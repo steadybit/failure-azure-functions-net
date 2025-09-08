@@ -29,7 +29,8 @@ public class FillDiskInjection(ILogger<FillDiskInjection> logger) : ISteadybitIn
 
         _logger.LogInformation(
             "Injected disk fill of {Megabytes} MB at {TempFilePath}.",
-            options.FillDisk.MegabytesValue, tempFilePath
+            options.FillDisk.MegabytesValue,
+            tempFilePath
         );
 
         return Task.CompletedTask;

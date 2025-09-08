@@ -1,11 +1,11 @@
+using System.Net;
+using System.Net.Sockets;
+using System.Text.Json;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SteadybitFaultInjection;
-using System.Net;
-using System.Net.Sockets;
-using System.Text.Json;
 
 namespace Steadybit.HttpTrigger;
 

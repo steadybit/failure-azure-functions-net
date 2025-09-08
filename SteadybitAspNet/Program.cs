@@ -1,9 +1,9 @@
+using System.Net;
+using System.Net.Sockets;
 using Azure.Identity;
 using Microsoft.Extensions.Primitives;
 using Serilog;
 using SteadybitFaultInjection;
-using System.Net;
-using System.Net.Sockets;
 
 var builder = WebApplication.CreateBuilder(args);
 

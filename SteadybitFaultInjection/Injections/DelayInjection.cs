@@ -55,7 +55,9 @@ public class DelayInjection(ILogger<DelayInjection> logger) : ISteadybitInjectio
 
         _logger.LogInformation(
             "Injecting delay of {Delay} milliseconds. Range: {MinimumLatency} - {MaximumLatency} milliseconds.",
-            delay, minimumLatency, maximumLatency
+            delay,
+            minimumLatency,
+            maximumLatency
         );
         await Task.Delay(TimeSpan.FromMilliseconds(delay));
     }

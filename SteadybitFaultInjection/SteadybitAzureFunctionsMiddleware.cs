@@ -9,7 +9,8 @@ namespace SteadybitFaultInjection;
 public class SteadybitAzureFunctionsMiddleware(
     IConfiguration configuration,
     ILogger<SteadybitAzureFunctionsMiddleware> logger,
-    IEnumerable<ISteadybitInjection> injections) : IFunctionsWorkerMiddleware
+    IEnumerable<ISteadybitInjection> injections
+) : IFunctionsWorkerMiddleware
 {
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger _logger = logger;

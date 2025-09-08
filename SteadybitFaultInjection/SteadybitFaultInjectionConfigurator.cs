@@ -12,14 +12,37 @@ public static class SteadybitFaultInjectionConfigurator
         this AzureAppConfigurationOptions options
     )
     {
+        string prefix = $"{SteadybitFaultInjectionsPrefix}{ResolveSuffix()}";
+
         return options
-            .Select($"{SteadybitFaultInjectionsPrefix}:*", LabelFilter.Null)
+            .Select($"{prefix}", LabelFilter.Null)
             .ConfigureRefresh(refresh =>
             {
                 refresh
-                    .Register($"{SteadybitFaultInjectionsPrefix}:Revision", refreshAll: true)
+                    .Register($"{prefix}:Revision", refreshAll: true)
                     .SetRefreshInterval(TimeSpan.FromSeconds(30));
             });
+    }
+
+    public static string ResolveSuffix()
+    {
+        var suffix = Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME");
+
+        if (suffix != null)
+        {
+            return $":{suffix}";
+        }
+
+        suffix = Environment.GetEnvironmentVariable("CONTAINER_APP_NAME");
+
+        if (suffix != null)
+        {
+            return $":{suffix}";
+        }
+
+        suffix = string.Empty;
+
+        return suffix;
     }
 
     public static void AddSteadybitFailureServices(this IServiceCollection services)

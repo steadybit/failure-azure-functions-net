@@ -15,7 +15,9 @@ public static class InjectionResolver
         }
 
         return injections.FirstOrDefault(injection =>
-            injection.GetType().Name.Equals(options.Injection, StringComparison.CurrentCultureIgnoreCase)
+            injection
+                .GetType()
+                .Name.Equals(options.Injection, StringComparison.CurrentCultureIgnoreCase)
             || injection
                 .GetType()
                 .Name.StartsWith(options.Injection, StringComparison.OrdinalIgnoreCase)
@@ -32,7 +34,9 @@ public static class InjectionResolver
 
         if (!InjectionHelper.IsValidRate(options.RateValue))
         {
-            logger.LogWarning("Key Steadybit:FaultInjection:Rate is not provided or invalid. Middleware won't be executed.");
+            logger.LogWarning(
+                "Key Steadybit:FaultInjection:Rate is not provided or invalid. Middleware won't be executed."
+            );
             return false;
         }
 
@@ -40,14 +44,17 @@ public static class InjectionResolver
         {
             logger.LogWarning(
                 "Rate is not met ({RateValue} <= {Rate}). Middleware won't be executed.",
-                options.RateValue, rateValue
+                options.RateValue,
+                rateValue
             );
             return false;
         }
 
         if (options?.Revision == null)
         {
-            logger.LogWarning("Sentinel key Steadybit:FaultInjection:Revision is missing. Middleware won't be executed.");
+            logger.LogWarning(
+                "Sentinel key Steadybit:FaultInjection:Revision is missing. Middleware won't be executed."
+            );
             return false;
         }
 
