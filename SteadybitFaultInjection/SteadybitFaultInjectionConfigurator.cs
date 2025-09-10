@@ -15,7 +15,7 @@ public static class SteadybitFaultInjectionConfigurator
         string prefix = $"{SteadybitFaultInjectionsPrefix}{ResolveSuffix()}";
 
         return options
-            .Select($"{prefix}", LabelFilter.Null)
+            .Select($"{prefix}:*", LabelFilter.Null)
             .ConfigureRefresh(refresh =>
             {
                 refresh
@@ -26,23 +26,33 @@ public static class SteadybitFaultInjectionConfigurator
 
     public static string ResolveSuffix()
     {
+        var name = ResolveName();
+
+        if (name != null)
+        {
+            return $":{name}";
+        }
+
+        return string.Empty;
+    }
+
+    public static string? ResolveName()
+    {
         var suffix = Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME");
 
         if (suffix != null)
         {
-            return $":{suffix}";
+            return suffix;
         }
 
         suffix = Environment.GetEnvironmentVariable("CONTAINER_APP_NAME");
 
         if (suffix != null)
         {
-            return $":{suffix}";
+            return suffix;
         }
 
-        suffix = string.Empty;
-
-        return suffix;
+        return null;
     }
 
     public static void AddSteadybitFailureServices(this IServiceCollection services)

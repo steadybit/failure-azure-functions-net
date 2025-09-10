@@ -20,7 +20,11 @@ public class HttpTrigger(ILogger<HttpTrigger> logger, IConfiguration configurati
     )
     {
         var options = new SteadybitInjectionOptions();
-        _configuration.GetSection("Steadybit:FaultInjection").Bind(options);
+        _configuration
+            .GetSection(
+                $"{SteadybitFaultInjectionConfigurator.SteadybitFaultInjectionsPrefix}{SteadybitFaultInjectionConfigurator.ResolveSuffix()}"
+            )
+            .Bind(options);
         _logger.LogInformation("C# HTTP trigger function processed a request.");
         var response = req.CreateResponse(System.Net.HttpStatusCode.OK);
         await response.WriteStringAsync(JsonSerializer.Serialize(options));

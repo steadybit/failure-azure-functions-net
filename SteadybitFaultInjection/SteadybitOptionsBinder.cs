@@ -9,7 +9,9 @@ public static class SteadybitOptionsBinder
     )
     {
         var options = new SteadybitInjectionOptions();
-        IConfigurationSection section = configuration.GetSection("Steadybit:FaultInjection");
+        var key =
+            $"{SteadybitFaultInjectionConfigurator.SteadybitFaultInjectionsPrefix}{SteadybitFaultInjectionConfigurator.ResolveSuffix()}";
+        IConfigurationSection section = configuration.GetSection(key);
         section.Bind(options);
 
         return options;
