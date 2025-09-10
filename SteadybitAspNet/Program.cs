@@ -7,12 +7,13 @@ using SteadybitFaultInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var endpoint = Environment.GetEnvironmentVariable("AZURE_APP_CONFIG_ENDPOINT");
+// STEADYBIT_FAULT_INJECTION_ENDPOINT is required for the discovery to work.
+var endpoint = Environment.GetEnvironmentVariable("STEADYBIT_FAULT_INJECTION_ENDPOINT");
 
 if (string.IsNullOrEmpty(endpoint))
 {
     throw new InvalidOperationException(
-        "AZURE_APP_CONFIG_ENDPOINT environment variable is not set."
+        "STEADYBIT_FAULT_INJECTION_ENDPOINT environment variable is not set."
     );
 }
 
