@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <PackageId>Steadybit.FaultInjection</PackageId>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <Company>Steadybit GmbH</Company>
     <PackageDescription>Steadybit Fault Injection Middleware</PackageDescription>
     <ImplicitUsings>enable</ImplicitUsings>
