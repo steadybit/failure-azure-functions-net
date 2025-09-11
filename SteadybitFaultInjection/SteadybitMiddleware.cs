@@ -9,7 +9,7 @@ public class SteadybitMiddleware(
     RequestDelegate next,
     IConfiguration configuration,
     ILogger<SteadybitAzureFunctionsMiddleware> logger
-    )
+)
 {
     private readonly RequestDelegate _next = next;
     private readonly IConfiguration _configuration = configuration;

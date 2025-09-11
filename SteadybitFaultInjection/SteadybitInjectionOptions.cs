@@ -137,7 +137,7 @@ public class SteadybitBlockInjectionOptions
             }
 
             return _hosts
-                .Split([','], StringSplitOptions.RemoveEmptyEntries)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(host => host.Trim())
                 .Where(host => !string.IsNullOrEmpty(host));
         }
