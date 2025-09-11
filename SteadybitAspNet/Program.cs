@@ -75,7 +75,11 @@ app.MapGet(
     (IConfiguration configuration, ILogger<Program> logger) =>
     {
         var options = new SteadybitInjectionOptions();
-        configuration.GetSection("Steadybit:FaultInjection").Bind(options);
+        configuration
+            .GetSection(
+                $"{SteadybitFaultInjectionConfigurator.SteadybitFaultInjectionsPrefix}{SteadybitFaultInjectionConfigurator.ResolveSuffix()}"
+            )
+            .Bind(options);
         logger.LogInformation("C# HTTP trigger function processed a request.");
         return Results.Ok(options);
     }
