@@ -25,17 +25,15 @@ jobs:
       snyk_available: ${{ secrets.SNYK_TOKEN  != '' && 'true' || 'false' }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '8.0.x'
 
       - run: dotnet test
-
       - run: dotnet build --configuration Release
 
       - name: "[release] Snyk test"
@@ -49,7 +47,7 @@ jobs:
 
       - name: SonarCloud scan
         if: ${{ env.sonar_available == 'true' }}
-        uses: sonarsource/sonarqube-scan-action@v5
+        uses: sonarsource/sonarqube-scan-action@v8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -70,12 +68,11 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '8.0.x'
 
@@ -83,7 +80,7 @@ jobs:
    
       - name: "[release] NuGet login"
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        uses: NuGet/login@v1
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
         id: login
         with:
           user: jedmeier
@@ -102,8 +99,7 @@ jobs:
     timeout-minutes: 30
     needs: audit
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
