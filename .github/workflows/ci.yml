@@ -25,7 +25,7 @@ jobs:
       snyk_available: ${{ secrets.SNYK_TOKEN  != '' && 'true' || 'false' }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -68,7 +68,7 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -99,7 +99,7 @@ jobs:
     timeout-minutes: 30
     needs: audit
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
