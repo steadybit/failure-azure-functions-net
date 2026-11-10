@@ -36,14 +36,15 @@ jobs:
       - run: dotnet test
       - run: dotnet build --configuration Release
 
+      - name: "[release] Set up Snyk CLI"
+        if: ${{ startsWith(github.ref, 'refs/tags/') && env.snyk_available == 'true' }}
+        uses: steadybit/extension-kit/.github/actions/setup-snyk@main # NOSONAR githubactions:S7637 - our own action
       - name: "[release] Snyk test"
         if: ${{ startsWith(github.ref, 'refs/tags/') && env.snyk_available == 'true' }}
-        uses: snyk/actions/dotnet@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --org=${{ vars.SNYK_ORG_ID }} --severity-threshold=high --all-projects --target-reference=${{ github.ref_name }}
-          command: test
+          SNYK_ORG_ID: ${{ vars.SNYK_ORG_ID }}
+        run: snyk test --org="$SNYK_ORG_ID" --severity-threshold=high --all-projects --target-reference="$GITHUB_REF_NAME"
 
       - name: SonarCloud scan
         if: ${{ env.sonar_available == 'true' }}
