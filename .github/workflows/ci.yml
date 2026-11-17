@@ -20,6 +20,10 @@ jobs:
     name: Audit
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write # SonarQube Cloud login without a stored token
     env:
       sonar_available: ${{ secrets.SONAR_TOKEN != '' && 'true' || 'false' }}
       snyk_available: ${{ secrets.SNYK_TOKEN  != '' && 'true' || 'false' }}
@@ -46,19 +50,34 @@ jobs:
           SNYK_ORG_ID: ${{ vars.SNYK_ORG_ID }}
         run: snyk test --org="$SNYK_ORG_ID" --severity-threshold=high --all-projects --target-reference="$GITHUB_REF_NAME"
 
+      # Secretless analysis: SonarQube Cloud exchanges the identity of this job for a token that is valid
+      # for 30 minutes and for the project bound to this repository only. Pull requests from forks and
+      # Dependabot runs get no identity; the stored SONAR_TOKEN stays as the fallback for now.
+      - name: SonarQube Cloud login
+        id: sonar-auth
+        if: ${{ github.actor != 'dependabot[bot]' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        continue-on-error: true
+        uses: SonarSource/sonarqube-auth-action@b372e2c2930aadfcc4f4399446da1e12772709ad # v1.2 NOSONAR githubactions:S7637 - verified action creator
+        with:
+          export-env: false
+
+      - name: Report a fallback to the stored Sonar token
+        if: ${{ steps.sonar-auth.outcome == 'failure' && env.sonar_available == 'true' }}
+        run: echo "::warning::SonarQube Cloud login without a token failed, the scan uses the stored SONAR_TOKEN. See the login step."
+
       - name: SonarCloud scan
-        if: ${{ env.sonar_available == 'true' }}
+        if: ${{ steps.sonar-auth.outputs.sonar-token != '' || env.sonar_available == 'true' }}
         uses: sonarsource/sonarqube-scan-action@v8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ steps.sonar-auth.outputs.sonar-token || secrets.SONAR_TOKEN }}
 
       - name: "[release] SonarCloud Quality Gate check"
-        if: ${{  startsWith(github.ref, 'refs/tags/') && env.sonar_available == 'true' }}
+        if: ${{  startsWith(github.ref, 'refs/tags/') && (steps.sonar-auth.outputs.sonar-token != '' || env.sonar_available == 'true') }}
         uses: sonarsource/sonarqube-quality-gate-action@v1
         timeout-minutes: 5
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ steps.sonar-auth.outputs.sonar-token || secrets.SONAR_TOKEN }}
 
   build:
     name: Build
